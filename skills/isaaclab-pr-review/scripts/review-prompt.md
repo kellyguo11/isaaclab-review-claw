@@ -250,6 +250,27 @@ fi
 
 **Important:** Only do this if the linter/pre-commit check actually FAILED. Do not run the formatter speculatively. After pushing, continue with the review on the remaining (non-linter) issues.
 
+### Step 5c: Check if PR is outdated
+
+Check if the PR branch is behind the target branch. If it is, note this in the review and offer to help rebase — but do NOT push any changes automatically.
+
+```bash
+# Check how far behind the PR branch is from the target
+BEHIND_COUNT=$(gh api repos/isaac-sim/IsaacLab/compare/{HEAD_REF}...{BASE_REF} --jq '.ahead_by' 2>/dev/null || echo "0")
+echo "PR branch is $BEHIND_COUNT commits behind {BASE_REF}"
+
+# Also check the merge status
+MERGEABLE=$(gh pr view {PR_NUMBER} --repo isaac-sim/IsaacLab --json mergeable --jq '.mergeable')
+echo "Mergeable status: $MERGEABLE"
+```
+
+If the branch is significantly behind (>20 commits) or has merge conflicts (CONFLICTING):
+- Add a **Branch Status** section to the review body
+- Offer to help update: "This branch is N commits behind `{BASE_REF}`. I can help rebase/merge if you'd like — just comment and I'll push the update."
+- **Do NOT rebase or merge automatically.** The author must explicitly request it.
+
+If the branch is slightly behind but has no conflicts, mention it briefly. If up-to-date, omit the section.
+
 ### Step 6: Self-Check Before Posting
 
 Before composing the review, go through EVERY inline comment you plan to post and ask:
@@ -293,6 +314,12 @@ First, compose the review body (overall summary):
 
 ### CI Status
 {Relevant test failures and analysis — or "All checks passing ✅"}
+
+### Branch Status
+{Only include this section if the branch is outdated or has conflicts:
+- "⚠️ This branch is N commits behind `base`. Recommend rebasing to pick up recent changes. I can help update the branch — just reply and I'll push a merge/rebase."
+- "❌ This branch has merge conflicts with `base`. Rebase needed before merge. I can help — just reply."
+- If the branch is up-to-date, omit this section entirely.}
 
 ### Findings
 {Numbered list with severity. Each finding must be concrete:
