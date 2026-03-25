@@ -137,28 +137,35 @@ function isDuplicate(key) {
 }
 
 // --- OpenClaw Agent Trigger ---
-// We use the cron wake mechanism to inject a system event into the main session,
-// or spawn an isolated agent session via the gateway API.
+// Write task to pending-tasks dir, then wake the main agent via system event.
+// The agent reads pending tasks on wake and spawns sub-agents for each.
+const OPENCLAW_BIN = process.env.OPENCLAW_BIN || path.join(process.env.HOME || "/home/horde", ".npm-global/bin/openclaw");
+const PENDING_DIR = path.join(__dirname, "..", "pending-tasks");
+
 function triggerAgent(task, label) {
-  // Use openclaw CLI to inject into a session
-  const sanitizedTask = task.replace(/'/g, "'\\''");
-  const OPENCLAW_BIN = process.env.OPENCLAW_BIN || "/home/horde/.npm-global/bin/openclaw";
+  // Ensure pending-tasks directory exists
+  if (!fs.existsSync(PENDING_DIR)) {
+    fs.mkdirSync(PENDING_DIR, { recursive: true });
+  }
+
+  // Write task to pending file
+  const taskFile = path.join(PENDING_DIR, `${label}-${Date.now()}.json`);
+  fs.writeFileSync(taskFile, JSON.stringify({
+    task,
+    label,
+    created: new Date().toISOString(),
+  }, null, 2));
+  console.log(`[agent] Wrote pending task: ${taskFile}`);
+
+  // Wake the main agent session via system event
   try {
-    // Write task to a temp file to avoid shell escaping issues
-    const tmpFile = `/tmp/isaaclab-review-task-${Date.now()}.txt`;
-    fs.writeFileSync(tmpFile, task);
-    const cmd = `${OPENCLAW_BIN} send --file "${tmpFile}" --label "${label}" --timeout 0 2>&1 || true`;
-    console.log(`[agent] Triggering: ${label}`);
-    const result = execSync(cmd, { timeout: 10000, encoding: "utf8" });
-    console.log(`[agent] Result: ${result.trim().slice(0, 200)}`);
-    // Clean up
-    try { fs.unlinkSync(tmpFile); } catch {}
+    const eventText = `PR review task queued: ${label}. Read the task file at ${taskFile} and spawn a sub-agent to execute it.`;
+    const cmd = `${OPENCLAW_BIN} system event --text "${eventText.replace(/"/g, '\\"')}" --mode now 2>&1`;
+    const result = execSync(cmd, { timeout: 15000, encoding: "utf8" });
+    console.log(`[agent] System event sent: ${result.trim().slice(0, 200)}`);
   } catch (e) {
-    console.error(`[agent] Failed to trigger via CLI, falling back to cron wake`);
-    // Fallback: write task to a file and use cron wake
-    const taskFile = path.join(__dirname, "..", `pending-task-${Date.now()}.json`);
-    fs.writeFileSync(taskFile, JSON.stringify({ task, label, created: new Date().toISOString() }));
-    console.log(`[agent] Wrote pending task to ${taskFile}`);
+    console.error(`[agent] Failed to send system event: ${e.message}`);
+    console.log(`[agent] Task saved at ${taskFile} — will be picked up on next heartbeat`);
   }
 }
 

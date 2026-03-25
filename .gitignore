@@ -7,6 +7,7 @@ skills/isaaclab-pr-review/webhook/config.json
 # Runtime state
 skills/isaaclab-pr-review/webhook/.pids
 skills/isaaclab-pr-review/pending-task-*.json
+skills/isaaclab-pr-review/pending-tasks/
 
 # OS
 .DS_Store
