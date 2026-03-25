@@ -1,0 +1,9 @@
+{
+  "appId": "YOUR_APP_ID",
+  "installationId": "YOUR_INSTALLATION_ID",
+  "privateKey": "PASTE_CONTENTS_OF_PEM_FILE_HERE",
+  "webhookSecret": "6caba8361d2c7243d2861ce226f25d7a01575662bca15e72e69860b816a09b14",
+  "smeeUrl": "https://smee.io/Il4Fu89qzX4Gpom",
+  "port": 19876,
+  "botLogin": "isaaclab-review-bot[bot]"
+}

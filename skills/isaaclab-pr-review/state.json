@@ -1,0 +1,46 @@
+{
+  "reviewed_prs": {
+    "5078": {
+      "last_reviewed_sha": "64eb552f637809cb8352778ef0d5a70ee97afbaf",
+      "reviewed_at": "2026-03-25T01:01:57.388Z",
+      "status": "reviewed"
+    },
+    "5097": {
+      "last_reviewed_sha": "b039d6530e40478122170de7e20c7cd8bbdadd97",
+      "reviewed_at": "2026-03-24T23:49:15.649Z",
+      "status": "reviewed"
+    },
+    "5099": {
+      "sha": "54c5bc6412f4a0a33f0a627954ff4d277a8aee3f",
+      "reviewed_at": "2026-03-24T18:04:00Z",
+      "title": "Updated golden images in test_rendering_correctness.py",
+      "author": "huidongc",
+      "result": "clean"
+    },
+    "5102": {
+      "sha": "bc400f60f550a8234ac8b47cf1af73a1be8f8fc8",
+      "reviewed_at": "2026-03-24T17:35:00Z",
+      "title": "Makes torch/array imports lazy in dict.py for lightweight environments",
+      "author": "kellyguo11",
+      "result": "minor_issues"
+    }
+  },
+  "last_poll": "2026-03-24T17:31:00Z",
+  "pending_reviews": {
+    "4831": {
+      "sha": "7126c21a81ee24c62c5fffa851e680a28d2744f2",
+      "triggered_at": "2026-03-25T00:39:44.439Z",
+      "action": "synchronize"
+    },
+    "5029": {
+      "sha": "7c0fafe8d50cc5e7bb71eef978987e010f834e69",
+      "triggered_at": "2026-03-25T00:58:53.132Z",
+      "action": "synchronize"
+    },
+    "5097": {
+      "sha": "afacbf8e9d849d5a620357da2f8b490ab0cb2576",
+      "triggered_at": "2026-03-25T00:54:21.656Z",
+      "action": "synchronize"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+# Dependencies
+skills/isaaclab-pr-review/webhook/node_modules/
+
+# Secrets — never commit
+skills/isaaclab-pr-review/webhook/config.json
+
+# Runtime state
+skills/isaaclab-pr-review/webhook/.pids
+skills/isaaclab-pr-review/pending-task-*.json
+
+# OS
+.DS_Store
