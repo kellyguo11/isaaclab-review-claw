@@ -201,7 +201,11 @@ async function handlePullRequest(payload) {
   // Get the installation token for the sub-agent to use
   const token = await getInstallationToken();
 
-  const task = buildReviewTask(pr, token);
+  // Use a lighter follow-up review for synchronize (new push) on already-reviewed PRs
+  const isFollowUp = action === "synchronize" && existing && existing.last_reviewed_sha;
+  const task = isFollowUp
+    ? buildFollowUpReviewTask(pr, token, existing.last_reviewed_sha)
+    : buildReviewTask(pr, token);
   triggerAgent(task, `isaaclab-pr-review-${prNum}`);
 
   // Mark as pending
@@ -525,6 +529,104 @@ console.log('State updated for PR #${prNum}');
 \`\`\`
 
 Report: PR number, inline comments posted, overall assessment, CI status.`;
+}
+
+function buildFollowUpReviewTask(pr, token, previousSha) {
+  const prNum = pr.number;
+  const headRef = pr.head.ref;
+  const headSha = pr.head.sha;
+  const baseRef = pr.base.ref;
+  const stateFilePath = STATE_PATH;
+
+  return `You are the Isaac Lab Review Bot. New commits have been pushed to PR #${prNum} which you previously reviewed.
+
+## Critical Rule: Minimal, targeted follow-up only
+
+This is NOT a full re-review. You are checking whether the new commits addressed your previous review comments and whether any new issues were introduced IN THE NEW CHANGES ONLY.
+
+**Rules:**
+1. **If all previous concerns are addressed and no new issues exist: post NOTHING.** Do not post a "looks good" comment. Do not post a summary. Silence means approval. Human engineers don't need bot clutter.
+2. **If a previous concern was addressed: resolve it silently.** Do not post "thanks for fixing this." Just note it internally.
+3. **If a previous concern was NOT addressed:** Do not re-post it. The original comment is still visible. Only comment if there's new context that changes your recommendation.
+4. **If new commits introduce NEW issues:** Post only those new findings, using the same standards as a full review (must be correct, actionable, worth the author's time).
+5. **Keep the review body extremely short.** If you must post, the summary should be 2-3 sentences max. No architecture section, no lengthy analysis.
+
+## Authentication
+export GH_TOKEN="${token}"
+
+## PR Details
+- Number: #${prNum}
+- Title: ${pr.title.replace(/"/g, '\\"')}
+- Author: @${pr.user.login}
+- Head: ${headRef} (${headSha})
+- Base: ${baseRef}
+- Previously reviewed SHA: ${previousSha}
+
+## Process
+
+### Step 1: Get the incremental diff (new commits only)
+\`\`\`bash
+export GH_TOKEN="${token}"
+# Diff between previously reviewed SHA and current HEAD
+gh api repos/${REPO}/compare/${previousSha}...${headSha} --jq '.files[] | {filename, status, patch}' 2>/dev/null || gh pr diff ${prNum} --repo ${REPO}
+\`\`\`
+
+### Step 2: Fetch your previous review comments
+\`\`\`bash
+# Get bot's previous review comments on this PR
+gh api repos/${REPO}/pulls/${prNum}/reviews --jq '[.[] | select(.user.login | test("bot")) | {id, body, state}]'
+gh api repos/${REPO}/pulls/${prNum}/comments --jq '[.[] | select(.user.login | test("bot")) | {id, path, line, body}]'
+\`\`\`
+
+### Step 3: Compare
+For each previous comment:
+- Was the issue fixed in the new commits? Note it internally.
+- Was it ignored? Leave it — the original comment stands.
+
+For each new change:
+- Does it introduce a NEW bug, regression, or quality issue?
+- Apply the same bar as a full review: must be correct, actionable, worth the author's time.
+
+### Step 4: Decide whether to post
+
+**If no new issues found:** Do NOT post any review. Update the state file and report back. That's it.
+
+**If new issues found:** Post a minimal review:
+\`\`\`markdown
+## 🤖 Isaac Lab Review Bot — Follow-up
+
+New commits (${previousSha.slice(0, 8)}→${headSha.slice(0, 8)}): {1 sentence summary of what changed}.
+
+{Only list NEW findings — not rehashes of previous comments}
+\`\`\`
+
+Post ONLY inline comments for new issues. Use:
+\`\`\`bash
+curl -s -X POST \\
+  -H "Authorization: Bearer ${token}" \\
+  -H "Accept: application/vnd.github+json" \\
+  https://api.github.com/repos/${REPO}/pulls/${prNum}/reviews \\
+  -d '<json_payload>'
+\`\`\`
+
+### Step 5: Update State
+\`\`\`bash
+node -e "
+const fs = require('fs');
+const s = JSON.parse(fs.readFileSync('${stateFilePath}', 'utf8'));
+s.reviewed_prs = s.reviewed_prs || {};
+s.reviewed_prs['${prNum}'] = {
+  last_reviewed_sha: '${headSha}',
+  reviewed_at: new Date().toISOString(),
+  status: 'reviewed'
+};
+delete (s.pending_reviews || {})['${prNum}'];
+fs.writeFileSync('${stateFilePath}', JSON.stringify(s, null, 2) + '\\n');
+console.log('State updated for PR #${prNum}');
+"
+\`\`\`
+
+Report: PR number, whether you posted anything, and if so what new issues were found.`;
 }
 
 function buildCommentReplyTask(pr, comment, token) {
