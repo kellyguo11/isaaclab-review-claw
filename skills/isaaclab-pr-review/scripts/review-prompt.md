@@ -209,6 +209,47 @@ For FAILED checks:
   - Check if the same tests pass on the base branch
   - Check if the failing tests touch code modified by the PR
 
+### Step 5b: Auto-fix Linter Failures
+
+If CI shows pre-commit, ruff, or linter check failures, **fix them automatically and push to the PR branch**:
+
+```bash
+# Check if pre-commit / linter checks failed
+LINTER_FAILED=$(gh api repos/isaac-sim/IsaacLab/commits/{HEAD_SHA}/check-runs --jq '.check_runs[] | select(.name | test("pre-commit|lint|ruff|codespell|license"; "i")) | select(.conclusion == "failure") | .name' 2>/dev/null)
+
+if [ -n "$LINTER_FAILED" ]; then
+  echo "Linter failures detected: $LINTER_FAILED"
+  
+  # Clone the repo and checkout the PR branch
+  WORK_DIR=$(mktemp -d)
+  git clone --depth=50 https://x-access-token:$GH_TOKEN@github.com/isaac-sim/IsaacLab.git "$WORK_DIR"
+  cd "$WORK_DIR"
+  gh pr checkout {PR_NUMBER} --repo isaac-sim/IsaacLab
+  
+  # Run the Isaac Lab formatter
+  ./isaaclab.sh -f
+  
+  # Check if anything changed
+  if ! git diff --quiet; then
+    git config user.name "isaaclab-review-bot[bot]"
+    git config user.email "isaaclab-review-bot[bot]@users.noreply.github.com"
+    git add -A
+    git commit -m "style: auto-fix linter issues
+
+Ran ./isaaclab.sh -f to fix pre-commit/ruff failures."
+    git push
+    echo "Pushed linter fixes to {HEAD_REF}"
+  else
+    echo "No linter fixes needed (failures may be non-formatting related)"
+  fi
+  
+  # Clean up
+  rm -rf "$WORK_DIR"
+fi
+```
+
+**Important:** Only do this if the linter/pre-commit check actually FAILED. Do not run the formatter speculatively. After pushing, continue with the review on the remaining (non-linter) issues.
+
 ### Step 6: Self-Check Before Posting
 
 Before composing the review, go through EVERY inline comment you plan to post and ask:
