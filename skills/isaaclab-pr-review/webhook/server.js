@@ -121,6 +121,19 @@ function saveState(state) {
   fs.writeFileSync(STATE_PATH, JSON.stringify(state, null, 2) + "\n");
 }
 
+// --- Slash Commands ---
+// /rebase           — rebase PR branch onto base
+// /bot <message>    — chat with the bot (ask questions, request actions)
+// /review           — request a fresh review
+
+function parseSlashCommand(body) {
+  const trimmed = body.trim();
+  // Match /command at the start of the comment (ignoring leading whitespace)
+  const match = trimmed.match(/^\/(\w+)(?:\s+([\s\S]*))?$/);
+  if (!match) return null;
+  return { command: match[1].toLowerCase(), args: (match[2] || "").trim() };
+}
+
 // --- Dedup / Rate Limiting ---
 const recentEvents = new Map(); // key -> timestamp
 const DEDUP_WINDOW_MS = 120_000; // 2 min
@@ -167,6 +180,223 @@ function triggerAgent(task, label) {
     console.error(`[agent] Failed to send system event: ${e.message}`);
     console.log(`[agent] Task saved at ${taskFile} — will be picked up on next heartbeat`);
   }
+}
+
+// --- Rebase Handler (runs directly, no sub-agent needed) ---
+
+async function handleRebaseCommand(prNum, comment) {
+  const dedupKey = `rebase-${prNum}-${comment.id}`;
+  if (isDuplicate(dedupKey)) {
+    console.log(`[rebase] Dedup: already processing rebase for PR #${prNum}`);
+    return;
+  }
+
+  console.log(`[rebase] PR #${prNum}: @${comment.user.login} requested rebase`);
+
+  let token;
+  try {
+    token = await getInstallationToken();
+  } catch (e) {
+    console.error(`[rebase] Failed to get token: ${e.message}`);
+    return;
+  }
+
+  // Post an "on it" reaction to the comment
+  try {
+    await ghApi(`/repos/${REPO}/issues/comments/${comment.id}/reactions`, "POST", { content: "rocket" });
+  } catch (e) {
+    console.log(`[rebase] Could not add reaction: ${e.message}`);
+  }
+
+  // Get PR details
+  const pr = await ghApi(`/repos/${REPO}/pulls/${prNum}`);
+  if (!pr) {
+    await postComment(prNum, token, `❌ Could not fetch PR #${prNum} details. Rebase aborted.`);
+    return;
+  }
+
+  if (pr.state !== "open") {
+    await postComment(prNum, token, `⚠️ PR #${prNum} is ${pr.state}. Can only rebase open PRs.`);
+    return;
+  }
+
+  const headRef = pr.head.ref;
+  const baseRef = pr.base.ref;
+  const headRepoFullName = pr.head.repo?.full_name;
+  const baseRepoFullName = pr.base.repo?.full_name;
+  const isFork = headRepoFullName !== baseRepoFullName;
+
+  // Check if the bot has push access to the head repo
+  // For forks, the PR author must have "Allow edits from maintainers" enabled
+  if (isFork && !pr.maintainer_can_modify) {
+    await postComment(prNum, token,
+      `❌ Cannot rebase: this PR is from a fork (\`${headRepoFullName}\`) and "Allow edits from maintainers" is not enabled.\n\n` +
+      `Please enable it in your PR settings, then ask me to rebase again.`
+    );
+    return;
+  }
+
+  const cloneUrl = `https://x-access-token:${token}@github.com/${headRepoFullName || REPO}.git`;
+  const upstreamUrl = isFork ? `https://x-access-token:${token}@github.com/${REPO}.git` : null;
+  const workDir = `/tmp/rebase-pr-${prNum}-${Date.now()}`;
+
+  try {
+    // Clone and rebase
+    console.log(`[rebase] Cloning ${headRepoFullName || REPO} branch ${headRef}...`);
+    execSync(`git clone --depth=100 --branch "${headRef}" "${cloneUrl}" "${workDir}"`, {
+      timeout: 120000,
+      encoding: "utf8",
+      stdio: "pipe",
+    });
+
+    // Configure git
+    execSync(`git config user.name "isaaclab-review-bot[bot]"`, { cwd: workDir, encoding: "utf8" });
+    execSync(`git config user.email "isaaclab-review-bot[bot]@users.noreply.github.com"`, { cwd: workDir, encoding: "utf8" });
+
+    // Fetch the base branch
+    if (isFork) {
+      execSync(`git remote add upstream "${upstreamUrl}"`, { cwd: workDir, encoding: "utf8" });
+      execSync(`git fetch upstream "${baseRef}" --depth=100`, { cwd: workDir, timeout: 120000, encoding: "utf8", stdio: "pipe" });
+      var rebaseTarget = `upstream/${baseRef}`;
+    } else {
+      execSync(`git fetch origin "${baseRef}" --depth=100`, { cwd: workDir, timeout: 120000, encoding: "utf8", stdio: "pipe" });
+      var rebaseTarget = `origin/${baseRef}`;
+    }
+
+    // Attempt rebase
+    try {
+      execSync(`git rebase "${rebaseTarget}"`, { cwd: workDir, timeout: 300000, encoding: "utf8", stdio: "pipe" });
+    } catch (rebaseErr) {
+      // Abort on conflict
+      try { execSync(`git rebase --abort`, { cwd: workDir, encoding: "utf8" }); } catch (_) {}
+      await postComment(prNum, token,
+        `❌ Rebase of \`${headRef}\` onto \`${baseRef}\` failed due to merge conflicts.\n\n` +
+        `You'll need to resolve these manually:\n` +
+        "```bash\n" +
+        `git fetch origin ${baseRef}\n` +
+        `git rebase origin/${baseRef}\n` +
+        `# resolve conflicts, then:\n` +
+        `git rebase --continue\n` +
+        `git push --force-with-lease\n` +
+        "```"
+      );
+      return;
+    }
+
+    // Force push
+    execSync(`git push --force-with-lease origin "${headRef}"`, { cwd: workDir, timeout: 120000, encoding: "utf8", stdio: "pipe" });
+
+    const newSha = execSync(`git rev-parse HEAD`, { cwd: workDir, encoding: "utf8" }).trim();
+    console.log(`[rebase] Successfully rebased PR #${prNum} onto ${baseRef}. New HEAD: ${newSha.slice(0, 8)}`);
+
+    await postComment(prNum, token,
+      `✅ Successfully rebased \`${headRef}\` onto \`${baseRef}\`.\n\n` +
+      `New HEAD: \`${newSha.slice(0, 8)}\``
+    );
+  } catch (e) {
+    console.error(`[rebase] Error during rebase of PR #${prNum}: ${e.message}`);
+    await postComment(prNum, token,
+      `❌ Rebase failed with an unexpected error:\n` +
+      "```\n" + (e.message || String(e)).slice(0, 500) + "\n```\n" +
+      `Please try rebasing manually.`
+    );
+  } finally {
+    // Cleanup
+    try { execSync(`rm -rf "${workDir}"`, { timeout: 10000 }); } catch (_) {}
+  }
+}
+
+async function postComment(prNum, token, body) {
+  try {
+    await ghApi(`/repos/${REPO}/issues/${prNum}/comments`, "POST", { body });
+  } catch (e) {
+    console.error(`[comment] Failed to post comment on PR #${prNum}: ${e.message}`);
+  }
+}
+
+// --- /review Command Handler ---
+
+async function handleFreshReviewCommand(prNum, comment) {
+  const dedupKey = `review-cmd-${prNum}-${comment.id}`;
+  if (isDuplicate(dedupKey)) return;
+
+  let token;
+  try {
+    token = await getInstallationToken();
+  } catch (e) {
+    console.error(`[review-cmd] Failed to get token: ${e.message}`);
+    return;
+  }
+
+  // React to acknowledge
+  try {
+    await ghApi(`/repos/${REPO}/issues/comments/${comment.id}/reactions`, "POST", { content: "eyes" });
+  } catch (_) {}
+
+  // Fetch PR details
+  const pr = await ghApi(`/repos/${REPO}/pulls/${prNum}`);
+  if (!pr) {
+    await postComment(prNum, token, `❌ Could not fetch PR #${prNum} details.`);
+    return;
+  }
+
+  if (pr.state !== "open") {
+    await postComment(prNum, token, `⚠️ PR #${prNum} is ${pr.state}. Can only review open PRs.`);
+    return;
+  }
+
+  console.log(`[review-cmd] Triggering fresh review for PR #${prNum}`);
+
+  // Clear the reviewed SHA so it triggers a full review (not follow-up)
+  const state = loadState();
+  if (state.reviewed_prs && state.reviewed_prs[String(prNum)]) {
+    delete state.reviewed_prs[String(prNum)];
+    saveState(state);
+  }
+
+  const task = buildReviewTask(pr, token);
+  triggerAgent(task, `isaaclab-pr-review-${prNum}`);
+}
+
+// --- /bot Chat Task Builder ---
+
+function buildBotChatTask(issue, comment, message, token) {
+  const prNum = issue.number;
+
+  return `You are the Isaac Lab Review Bot. A user is chatting with you via /bot command on PR #${prNum}.
+
+## Authentication
+export GH_TOKEN="${token}"
+
+## Context
+- PR: #${prNum} "${issue.title.replace(/"/g, '\\"')}"
+- Comment by: @${comment.user.login}
+- Their message: ${JSON.stringify(message)}
+- Comment ID: ${comment.id}
+
+## Your Job
+The user sent \`/bot ${message.replace(/`/g, "\\`")}\` on a PR. They might want:
+- Help understanding part of the codebase
+- An explanation of a review finding
+- A re-review of specific files
+- General questions about the PR or related code
+- Help with git operations (cherry-pick, squash, etc.)
+
+1. Understand what they're asking
+2. If you need to look at code, fetch it:
+   \`\`\`bash
+   gh api repos/${REPO}/contents/{FILE_PATH}?ref={REF} -H "Accept: application/vnd.github.raw+json"
+   \`\`\`
+3. Post a helpful, concise reply:
+   \`\`\`bash
+   curl -s -X POST \\
+     -H "Authorization: Bearer ${token}" \\
+     -H "Accept: application/vnd.github+json" \\
+     https://api.github.com/repos/${REPO}/issues/${prNum}/comments \\
+     -d '{"body": "<your reply>"}'
+   \`\`\`
+
+Be helpful, concise, and reference specific code when relevant.`;
 }
 
 // --- Event Handlers ---
@@ -234,6 +464,27 @@ async function handlePRReviewComment(payload) {
     return;
   }
 
+  // Check for slash commands in review comment replies
+  const cmd = parseSlashCommand(comment.body);
+  if (cmd) {
+    switch (cmd.command) {
+      case "rebase":
+        console.log(`[review-comment] PR #${prNum}: @${comment.user.login} requested /rebase`);
+        await handleRebaseCommand(prNum, comment);
+        return;
+      case "bot": {
+        if (!cmd.args) return;
+        console.log(`[review-comment] PR #${prNum}: @${comment.user.login} /bot: "${cmd.args.slice(0, 100)}..."`);
+        const token = await getInstallationToken();
+        const task = buildCommentReplyTask(pr, { ...comment, body: cmd.args }, token);
+        triggerAgent(task, `isaaclab-pr-comment-${prNum}-${comment.id}`);
+        return;
+      }
+      default:
+        break; // Fall through to normal review comment handling
+    }
+  }
+
   const dedupKey = `comment-${comment.id}`;
   if (isDuplicate(dedupKey)) return;
 
@@ -260,7 +511,37 @@ async function handleIssueComment(payload) {
   const dedupKey = `issue-comment-${comment.id}`;
   if (isDuplicate(dedupKey)) return;
 
-  // Check if the comment mentions the bot or is a reply to the bot's review
+  // Check for slash commands
+  const cmd = parseSlashCommand(comment.body);
+  if (cmd) {
+    switch (cmd.command) {
+      case "rebase":
+        console.log(`[issue-comment] PR #${prNum}: @${comment.user.login} requested /rebase`);
+        await handleRebaseCommand(prNum, comment);
+        return;
+      case "review":
+        console.log(`[issue-comment] PR #${prNum}: @${comment.user.login} requested /review`);
+        // Trigger a fresh full review by synthesizing a PR event
+        await handleFreshReviewCommand(prNum, comment);
+        return;
+      case "bot": {
+        if (!cmd.args) {
+          console.log(`[issue-comment] PR #${prNum}: /bot with no message, ignoring`);
+          return;
+        }
+        console.log(`[issue-comment] PR #${prNum}: @${comment.user.login} /bot: "${cmd.args.slice(0, 100)}..."`);
+        const token = await getInstallationToken();
+        const task = buildBotChatTask(issue, comment, cmd.args, token);
+        triggerAgent(task, `isaaclab-pr-bot-${prNum}-${comment.id}`);
+        return;
+      }
+      default:
+        console.log(`[issue-comment] PR #${prNum}: Unknown slash command /${cmd.command}, ignoring`);
+        return;
+    }
+  }
+
+  // Check if the comment mentions the bot (legacy @mention support)
   const botMentioned = comment.body.includes(`@${botLogin.replace("[bot]", "")}`) ||
                        comment.body.toLowerCase().includes("@isaaclab-review");
 
