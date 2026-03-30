@@ -1,18 +1,73 @@
 {
   "reviewed_prs": {
+    "3895": {
+      "last_reviewed_sha": "6317335a530e884bd5d92ac40516ca87011b2e73",
+      "reviewed_at": "2026-03-29T12:17:30.988Z",
+      "status": "reviewed"
+    },
+    "4830": {
+      "last_reviewed_sha": "1d1d8f24852e92afdc112908c61bde85def9e9b5",
+      "reviewed_at": "2026-03-25T03:44:06.716Z",
+      "status": "reviewed"
+    },
+    "4889": {
+      "last_reviewed_sha": "4939c1bf253fd5dac1ec9eb974b0871d5d449b7d",
+      "reviewed_at": "2026-03-27T10:58:05.483Z",
+      "status": "reviewed"
+    },
+    "4923": {
+      "last_reviewed_sha": "6585962a2b6b5255800abed16e600726d825631e",
+      "reviewed_at": "2026-03-25T17:55:58.020Z",
+      "status": "reviewed"
+    },
+    "5017": {
+      "last_reviewed_sha": "1f256dbb4d5f2cdb5dd507e49c75ad49312c8e86",
+      "reviewed_at": "2026-03-25T20:03:29.781Z",
+      "status": "reviewed"
+    },
+    "5029": {
+      "last_reviewed_sha": "f185b49087b317c254bab8673c3fccd80b2ee1a4",
+      "reviewed_at": "2026-03-28T00:08:56.404Z",
+      "status": "reviewed"
+    },
     "5049": {
       "last_reviewed_sha": "9d22d6202a8a5f17d02ee9e7f984ee81e3ed0c21",
       "reviewed_at": "2026-03-25T01:30:29.599Z",
       "status": "reviewed"
     },
+    "5051": {
+      "last_reviewed_sha": "ca8f8ca77da8a08885cf6d351ce7fcbc83dc7a4d",
+      "reviewed_at": "2026-03-25T20:07:14.227Z",
+      "status": "reviewed"
+    },
+    "5056": {
+      "last_reviewed_sha": "db26442e0c32cb2b29998d4356e54ea6c9d473ef",
+      "reviewed_at": "2026-03-25T20:06:01.875Z",
+      "status": "reviewed"
+    },
+    "5070": {
+      "last_reviewed_sha": "9e9d7e44727b9add736216dab94b0e462de2e75a",
+      "reviewed_at": "2026-03-25T19:59:00.201Z",
+      "status": "reviewed"
+    },
+    "5072": {
+      "last_reviewed_sha": "8abd1d132fd627f93e8474fbd89b8ee03888ad93",
+      "reviewed_at": "2026-03-25T20:01:18.116Z",
+      "status": "reviewed"
+    },
     "5078": {
-      "last_reviewed_sha": "64eb552f637809cb8352778ef0d5a70ee97afbaf",
-      "reviewed_at": "2026-03-25T01:01:57.388Z",
+      "last_reviewed_sha": "927f1168f786e880ebd3e96d1f1d800797b28b10",
+      "reviewed_at": "2026-03-25T20:21:12.741Z",
+      "status": "reviewed"
+    },
+    "5082": {
+      "last_reviewed_sha": "2947b868ad580c87f366209e495b414bcabbb444",
+      "reviewed_at": "2026-03-25T20:09:36.574Z",
       "status": "reviewed"
     },
     "5097": {
-      "last_reviewed_sha": "4ac1d39a617bbe634e395012a6d1eea1b69995c8",
-      "reviewed_at": "2026-03-25T01:16:52.783Z",
+      "last_reviewed_sha": "be20237e54598280364b2147a8c4fa2d67064c0c",
+      "reviewed_at": "2026-03-26T01:35:26.278Z",
       "status": "reviewed"
     },
     "5099": {
@@ -28,6 +83,46 @@
       "title": "Makes torch/array imports lazy in dict.py for lightweight environments",
       "author": "kellyguo11",
       "result": "minor_issues"
+    },
+    "5105": {
+      "last_reviewed_sha": "b09dd6c8816db3966cb8a3679c9d24cdec6ad9c1",
+      "reviewed_at": "2026-03-28T23:54:08.882Z",
+      "status": "reviewed"
+    },
+    "5107": {
+      "last_reviewed_sha": "a3a0e4e4a638ada2d52e3e39ca5c970d61586e7c",
+      "reviewed_at": "2026-03-26T00:52:18.680Z",
+      "status": "reviewed"
+    },
+    "5108": {
+      "last_reviewed_sha": "13fa9a78791572670fc20c94f45f5a52e41fe0ce",
+      "reviewed_at": "2026-03-28T04:49:53.722Z",
+      "status": "reviewed"
+    },
+    "5109": {
+      "last_reviewed_sha": "711307a2ab23db7641601208ef9b7bbed3882cf3",
+      "reviewed_at": "2026-03-26T01:38:54.960Z",
+      "status": "reviewed"
+    },
+    "5111": {
+      "last_reviewed_sha": "2b0e5bc2176752b637a2163e9ba231acc6e94da0",
+      "reviewed_at": "2026-03-26T07:28:37.653Z",
+      "status": "reviewed"
+    },
+    "5113": {
+      "last_reviewed_sha": "267a7ff8edb047ba29dea1e45b6fd9df83e0e9cc",
+      "reviewed_at": "2026-03-26T20:17:17.110Z",
+      "status": "reviewed"
+    },
+    "5117": {
+      "last_reviewed_sha": "f3865c60e7f2e01f611d0933730d5c9fc09f136b",
+      "reviewed_at": "2026-03-27T09:04:47.040Z",
+      "status": "reviewed"
+    },
+    "5119": {
+      "last_reviewed_sha": "8e45cfb3cfdc5ab369d4d989a922ed83e52ed7aa",
+      "reviewed_at": "2026-03-27T19:16:44.773Z",
+      "status": "reviewed"
     }
   },
   "last_poll": "2026-03-24T17:31:00Z",
@@ -37,9 +132,14 @@
       "triggered_at": "2026-03-25T00:39:44.439Z",
       "action": "synchronize"
     },
-    "5029": {
-      "sha": "7c0fafe8d50cc5e7bb71eef978987e010f834e69",
-      "triggered_at": "2026-03-25T00:58:53.132Z",
+    "5107": {
+      "sha": "a3a0e4e4a638ada2d52e3e39ca5c970d61586e7c",
+      "triggered_at": "2026-03-26T00:51:06.173Z",
+      "action": "synchronize"
+    },
+    "5109": {
+      "sha": "711307a2ab23db7641601208ef9b7bbed3882cf3",
+      "triggered_at": "2026-03-26T01:37:58.285Z",
       "action": "synchronize"
     }
   }

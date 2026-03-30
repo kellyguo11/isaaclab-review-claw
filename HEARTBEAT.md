@@ -6,3 +6,12 @@ Check for pending review tasks in `skills/isaaclab-pr-review/pending-tasks/`. Fo
 2. Spawn a sub-agent with `sessions_spawn` using the task content
 3. Delete the task file after spawning
 If no pending tasks, skip this check.
+
+## Review Bot Health Check
+The review bot webhook server and smee proxy run under supervisord (`isaaclab-review-bot`, `isaaclab-review-smee`).
+Quick check: `sudo supervisorctl status isaaclab-review-bot isaaclab-review-smee`
+If either is not RUNNING, run: `sudo supervisorctl restart isaaclab-review-bot isaaclab-review-smee`
+Only alert if restart fails.
+
+## Training Campaign Quick Check
+Run `bash /home/horde/IsaacLab/training_campaign/watchdog.sh` — if it says CAMPAIGN_DEAD, restart it (the script handles this automatically). Only alert if RESTART_FAILED.
