@@ -45,6 +45,31 @@
       "reviewed_at": "2026-03-25T20:06:01.875Z",
       "status": "reviewed"
     },
+    "5058": {
+      "last_reviewed_sha": "49a19e02b35724d1246e8bf50431374fe4244505",
+      "reviewed_at": "2026-03-30T02:36:09.081Z",
+      "status": "reviewed"
+    },
+    "5060": {
+      "last_reviewed_sha": "fa160b700bcd3e101cfaa0fa4e531709bd469e4e",
+      "reviewed_at": "2026-03-30T02:30:39.372Z",
+      "status": "reviewed"
+    },
+    "5061": {
+      "last_reviewed_sha": "1302558a3aa3b60487fd274357d3b3d90e2b2dbd",
+      "reviewed_at": "2026-03-30T02:27:38.994Z",
+      "status": "reviewed"
+    },
+    "5062": {
+      "last_reviewed_sha": "abba9715b676d055cb6debcb5eb442fbda237d16",
+      "reviewed_at": "2026-03-30T02:24:28.398Z",
+      "status": "reviewed"
+    },
+    "5063": {
+      "last_reviewed_sha": "83703da707f9fda90de32d2225df593c38223a63",
+      "reviewed_at": "2026-03-30T02:25:48.288Z",
+      "status": "reviewed"
+    },
     "5070": {
       "last_reviewed_sha": "9e9d7e44727b9add736216dab94b0e462de2e75a",
       "reviewed_at": "2026-03-25T19:59:00.201Z",
@@ -60,14 +85,34 @@
       "reviewed_at": "2026-03-25T20:21:12.741Z",
       "status": "reviewed"
     },
+    "5081": {
+      "last_reviewed_sha": "165a39c0c8fce6911ba9f917b9ffcbf9a0fbeef5",
+      "reviewed_at": "2026-03-30T02:29:53.473Z",
+      "status": "reviewed"
+    },
     "5082": {
       "last_reviewed_sha": "2947b868ad580c87f366209e495b414bcabbb444",
       "reviewed_at": "2026-03-25T20:09:36.574Z",
       "status": "reviewed"
     },
+    "5088": {
+      "last_reviewed_sha": "7589193202e679b2571b7b33776f7841edd2a3f8",
+      "reviewed_at": "2026-03-30T02:21:52.659Z",
+      "status": "reviewed"
+    },
+    "5096": {
+      "last_reviewed_sha": "3a3da7369ab0c7b24641d6a9bfbc5a2015e77576",
+      "reviewed_at": "2026-03-30T02:20:10.656Z",
+      "status": "reviewed"
+    },
     "5097": {
       "last_reviewed_sha": "be20237e54598280364b2147a8c4fa2d67064c0c",
       "reviewed_at": "2026-03-26T01:35:26.278Z",
+      "status": "reviewed"
+    },
+    "5098": {
+      "last_reviewed_sha": "01d83a31e41dcdca9c53573cba92514e557b42d3",
+      "reviewed_at": "2026-03-30T02:26:33.347Z",
       "status": "reviewed"
     },
     "5099": {
@@ -83,6 +128,16 @@
       "title": "Makes torch/array imports lazy in dict.py for lightweight environments",
       "author": "kellyguo11",
       "result": "minor_issues"
+    },
+    "5103": {
+      "last_reviewed_sha": "4a42c18b9cabb7cc866e4e972fe77fdb167dee27",
+      "reviewed_at": "2026-03-30T02:20:17.698Z",
+      "status": "reviewed"
+    },
+    "5104": {
+      "last_reviewed_sha": "8b2a6259b142a5f638309277de6a595d573775d4",
+      "reviewed_at": "2026-03-30T02:14:09.779Z",
+      "status": "reviewed"
     },
     "5105": {
       "last_reviewed_sha": "b09dd6c8816db3966cb8a3679c9d24cdec6ad9c1",
@@ -122,6 +177,11 @@
     "5119": {
       "last_reviewed_sha": "8e45cfb3cfdc5ab369d4d989a922ed83e52ed7aa",
       "reviewed_at": "2026-03-27T19:16:44.773Z",
+      "status": "reviewed"
+    },
+    "5124": {
+      "last_reviewed_sha": "9a16c38a24f9ce14ff652b833ba47b1c9f35ff56",
+      "reviewed_at": "2026-03-30T02:23:17.964Z",
       "status": "reviewed"
     }
   },
