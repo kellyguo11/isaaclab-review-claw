@@ -488,6 +488,32 @@ async function handlePRReviewComment(payload) {
   const dedupKey = `comment-${comment.id}`;
   if (isDuplicate(dedupKey)) return;
 
+  // Only respond to review comments that are replies to our own comments,
+  // or that @mention the bot. Top-level review comments from other humans
+  // (e.g., during their own review) should NOT trigger the bot.
+  const isReplyToThread = !!comment.in_reply_to_id;
+  const mentionsBot = comment.body.includes(`@${botLogin.replace("[bot]", "")}`) ||
+                      comment.body.toLowerCase().includes("@isaaclab-review");
+
+  if (!isReplyToThread && !mentionsBot) {
+    console.log(`[comment] PR #${prNum}: @${comment.user.login} posted top-level review comment (not a reply to bot, no @mention), skipping`);
+    return;
+  }
+
+  // If it's a thread reply, verify the parent comment is from the bot
+  if (isReplyToThread && !mentionsBot) {
+    try {
+      const parentComment = await ghApi(`/repos/${REPO}/pulls/comments/${comment.in_reply_to_id}`);
+      if (parentComment && parentComment.user && parentComment.user.login !== botLogin && parentComment.user.type !== "Bot") {
+        console.log(`[comment] PR #${prNum}: @${comment.user.login} replied in thread started by @${parentComment.user.login} (not bot), skipping`);
+        return;
+      }
+    } catch (e) {
+      console.warn(`[comment] PR #${prNum}: Failed to fetch parent comment ${comment.in_reply_to_id}: ${e.message}`);
+      // If we can't verify, still respond to be safe
+    }
+  }
+
   console.log(`[comment] PR #${prNum}: @${comment.user.login} replied to review comment: "${comment.body.slice(0, 100)}..."`);
 
   const token = await getInstallationToken();
