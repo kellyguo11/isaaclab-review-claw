@@ -10,6 +10,16 @@ const path = require("path");
 const { execSync, spawn } = require("child_process");
 const jwt = require("jsonwebtoken");
 
+// Multi-agent review system
+let multiAgent;
+try {
+  multiAgent = require("./multi-agent.js");
+  console.log("[init] Multi-agent review system loaded");
+} catch (e) {
+  console.warn("[init] Multi-agent module not found, using single-agent reviews:", e.message);
+  multiAgent = null;
+}
+
 // --- Configuration ---
 const CONFIG_PATH = path.join(__dirname, "config.json");
 const STATE_PATH = path.join(__dirname, "..", "state.json");
@@ -433,9 +443,25 @@ async function handlePullRequest(payload) {
 
   // Use a lighter follow-up review for synchronize (new push) on already-reviewed PRs
   const isFollowUp = action === "synchronize" && existing && existing.last_reviewed_sha;
-  const task = isFollowUp
-    ? buildFollowUpReviewTask(pr, token, existing.last_reviewed_sha)
-    : buildReviewTask(pr, token);
+  
+  let task;
+  if (isFollowUp) {
+    // Follow-up reviews use single-agent (lighter weight)
+    task = buildFollowUpReviewTask(pr, token, existing.last_reviewed_sha);
+  } else if (multiAgent) {
+    // New PRs use multi-agent review (3 perspectives + aggregation)
+    task = multiAgent.buildMultiAgentReviewTask(pr, token);
+    if (!task) {
+      // Fallback if agent prompts missing
+      console.log(`[pr] Multi-agent unavailable, using single-agent for PR #${prNum}`);
+      task = buildReviewTask(pr, token);
+    } else {
+      console.log(`[pr] Using multi-agent review for PR #${prNum}`);
+    }
+  } else {
+    // No multi-agent module, use single-agent
+    task = buildReviewTask(pr, token);
+  }
   triggerAgent(task, `isaaclab-pr-review-${prNum}`);
 
   // Mark as pending

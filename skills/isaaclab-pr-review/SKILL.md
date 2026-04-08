@@ -1,108 +1,156 @@
 # Isaac Lab PR Review Bot
 
-Webhook-driven, interactive code review bot for `isaac-sim/IsaacLab`.
+Webhook-driven, multi-perspective code review bot for `isaac-sim/IsaacLab`.
 
 ## Architecture
 
 ```
-GitHub PR event → GitHub webhook → smee.io → local smee client → webhook server (port 19876) → OpenClaw sub-agent
+GitHub PR event → GitHub webhook → smee.io → local smee client → webhook server (port 19876) → OpenClaw coordinator
+                                                                                                      ↓
+                                                                                    ┌─────────────────┼─────────────────┐
+                                                                                    ↓                 ↓                 ↓
+                                                                            Isaac Lab Expert   Failure Hunter   Test Analyzer
+                                                                                    ↓                 ↓                 ↓
+                                                                                    └─────────────────┼─────────────────┘
+                                                                                                      ↓
+                                                                                                 Aggregator
+                                                                                                      ↓
+                                                                                              GitHub PR Review
 ```
 
-**Triggers:**
-- PR opened / new commits pushed / reopened → full code review
-- Engineer replies to a review comment → bot responds in-thread
-- Engineer @mentions the bot in a PR comment → bot responds
+**Review Modes:**
+- **New PRs:** Multi-agent review (3 specialized perspectives + aggregation)
+- **Follow-up pushes:** Lightweight single-agent incremental review
+- **Comment replies:** Context-aware conversational response
 
 **Bot posts as:** GitHub App (`IsaacLab Review Bot[bot]`), not as any personal account.
 
-## Setup Checklist
+## Multi-Agent Review System
 
-1. ✅ Smee channel created: `https://smee.io/Il4Fu89qzX4Gpom`
-2. ⬜ GitHub App created (see instructions below)
-3. ⬜ App credentials added to `webhook/config.json`
-4. ⬜ Webhook server started: `bash webhook/start.sh`
+New PRs get reviewed by 3 specialized agents in parallel, then aggregated:
 
-## GitHub App Settings
+### 1. Isaac Lab Expert (`agents/isaaclab-expert.md`)
+- Architecture and design assessment
+- Cross-module impact analysis
+- Implementation correctness (tensor ops, simulation lifecycle)
+- Framework-specific patterns and conventions
+
+### 2. Silent Failure Hunter (`agents/silent-failure-hunter.md`)
+*Inspired by [Anthropic's PR Review Toolkit](https://github.com/anthropics/claude-code/tree/main/plugins/pr-review-toolkit/agents)*
+- Error handling audit
+- Silent failure detection
+- Broad exception catching
+- Missing error checks
+
+### 3. Test Coverage Analyzer (`agents/test-analyzer.md`)
+*Inspired by [Superpowers](https://github.com/obra/superpowers) code review methodology*
+- Test coverage quality
+- Regression test requirements for bug fixes
+- Test determinism and isolation
+- Critical gap identification
+
+### Aggregator (`agents/aggregator.md`)
+- Deduplicates findings across agents
+- Calibrates severity ratings
+- Resolves conflicting assessments
+- Produces unified review with 3-8 high-quality findings
+
+## Files
+
+```
+agents/
+  isaaclab-expert.md     — Domain expert prompt
+  silent-failure-hunter.md — Error handling auditor prompt
+  test-analyzer.md       — Test coverage analyst prompt
+  aggregator.md          — Review synthesizer prompt
+webhook/
+  server.js              — Webhook receiver + agent trigger
+  multi-agent.js         — Multi-agent task builder
+  start.sh               — Start smee + server
+  stop.sh                — Stop everything
+  config.json            — App credentials (gitignored)
+scripts/
+  poll-prs.sh            — (Legacy) cron-based polling
+  review-prompt.md       — Single-agent prompt reference
+state.json               — Tracks reviewed PRs
+```
+
+## Setup
+
+### Prerequisites
+- Node.js 18+
+- OpenClaw CLI (`openclaw`)
+- smee-client (`npm install -g smee-client`)
+
+### 1. Create GitHub App
 
 | Setting | Value |
 |---------|-------|
 | Name | `IsaacLab Review Bot` |
 | Homepage URL | `https://github.com/isaac-sim/IsaacLab` |
 | Webhook URL | `https://smee.io/Il4Fu89qzX4Gpom` |
-| Webhook secret | `6caba8361d2c7243d2861ce226f25d7a01575662bca15e72e69860b816a09b14` |
-| Webhook active | ✅ |
+| Webhook secret | *(generate one)* |
 
 **Permissions:** Pull requests (R&W), Contents (Read), Checks (Read), Metadata (Read)
-
 **Events:** Pull requests, Pull request review comments, Issue comments
-
 **Install on:** `isaac-sim/IsaacLab` only
 
-## Files
+### 2. Configure
 
-```
-webhook/
-  server.js          — Webhook receiver + agent trigger
-  start.sh           — Start smee + server
-  stop.sh            — Stop everything
-  config.json        — App credentials (gitignored)
-  config.json.template — Template for credentials
-scripts/
-  poll-prs.sh        — (Legacy) cron-based polling
-  review-prompt.md   — Review prompt template reference
-state.json           — Tracks reviewed PRs
+```bash
+cp webhook/config.json.template webhook/config.json
+# Edit config.json with App ID, Installation ID, Private Key
 ```
 
-## Config
+### 3. Run with Supervisord (recommended)
 
-After creating the GitHub App, copy `config.json.template` to `config.json` and fill in:
-
-```json
-{
-  "appId": "123456",
-  "installationId": "12345678",
-  "privateKey": "-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----",
-  "webhookSecret": "6caba8361d2c7243d2861ce226f25d7a01575662bca15e72e69860b816a09b14",
-  "smeeUrl": "https://smee.io/Il4Fu89qzX4Gpom",
-  "port": 19876,
-  "botLogin": "isaaclab-review-bot[bot]"
-}
+```bash
+# Create /etc/supervisor/conf.d/isaaclab-review-bot.conf
+sudo supervisorctl reread && sudo supervisorctl update
+sudo supervisorctl status isaaclab-review-bot isaaclab-review-smee
 ```
 
-Note: `botLogin` format is `{app-slug}[bot]` — check the app's slug after creation.
+Or manually: `bash webhook/start.sh`
 
-## What the Bot Reviews
+## What Gets Reviewed
 
-### Style Guide (from CONTRIBUTING.md)
-- License headers, file/class structure ordering
-- Type hints in signatures only, Google-style docstrings
-- Import ordering, CHANGELOG.rst updates
-- Line length (120), ruff rules compliance
+### Design & Architecture
+- Is this the right abstraction level?
+- Does it follow Isaac Lab's ownership model?
+- Cross-module impact analysis
+- Alternative approaches considered
 
-### Architecture (deep analysis)
-- Cross-module impact (core → tasks → rl → assets)
-- API symmetry between PhysX/Newton backends
-- Config/dataclass consistency
-- Breaking changes and backward compatibility
-- Tensor ops (shapes, devices, broadcasting, gradients)
-- Simulation lifecycle correctness
-- Performance issues
+### Implementation
+- Tensor shape/device/dtype correctness
+- Simulation lifecycle (pre/post physics, reset handling)
+- API contract compliance
+- Performance implications
 
-### CI Status
-- Parse check run results
-- Identify PR-caused vs pre-existing failures
-- Report relevant test failures with context
+### Error Handling
+- Silent failure detection
+- Exception handling quality
+- Fallback behavior appropriateness
 
-## Interactive Comments
+### Test Coverage
+- Regression tests for bug fixes (mandatory)
+- Edge case coverage
+- Test quality and determinism
 
-When an engineer replies to a bot review comment:
-1. Bot receives the webhook
-2. Spawns agent with the comment context + relevant file
-3. Agent reads the code, understands the question
-4. Posts a reply in the same thread
+### Style Guide
+- License headers
+- Docstring quality
+- Type hints
+- CHANGELOG updates
 
-The bot can:
-- Clarify its review feedback
-- Acknowledge valid counterpoints
-- Provide alternative suggestions
-- Re-examine code if pointed to missed context
+## Slash Commands
+
+In PR comments:
+- `/review` — Request a fresh full review
+- `/rebase` — Rebase the PR branch onto base
+- `/bot <question>` — Ask the bot a question
+
+## Credits
+
+Multi-agent architecture inspired by:
+- [Superpowers](https://github.com/obra/superpowers) — Structured code review methodology
+- [Anthropic PR Review Toolkit](https://github.com/anthropics/claude-code/tree/main/plugins/pr-review-toolkit/agents) — Specialized review agents
