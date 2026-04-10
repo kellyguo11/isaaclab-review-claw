@@ -39,6 +39,36 @@ const APP_ID = config.appId;
 const PRIVATE_KEY = config.privateKey;
 const INSTALLATION_ID = config.installationId;
 
+// --- Identity Verification ---
+// Every sub-agent task includes this pre-flight check to ensure
+// it posts as the bot app (not the user's personal gh account).
+function identityCheckBlock(token) {
+  return `## ⚠️ CRITICAL: Identity Verification (run this FIRST, before ANY GitHub write)
+
+Before posting ANY comment, review, reaction, or push to GitHub, you MUST verify you are authenticated as the bot:
+
+\`\`\`bash
+export GH_TOKEN="${token}"
+
+# Verify identity — this MUST show the bot app, NOT a personal account
+IDENTITY=$(curl -s -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/user | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('login','UNKNOWN'))" 2>/dev/null || echo "UNKNOWN")
+echo "Authenticated as: $IDENTITY"
+
+if [[ "$IDENTITY" != *"[bot]"* && "$IDENTITY" != *"bot"* ]]; then
+  echo "ERROR: Not authenticated as bot! Got: $IDENTITY"
+  echo "DO NOT proceed — all GitHub writes must come from the bot account."
+  exit 1
+fi
+\`\`\`
+
+**Rules:**
+- ALWAYS run \`export GH_TOKEN="${token}"\` before ANY \`gh\` CLI or \`curl\` command
+- NEVER use \`gh\` without first exporting GH_TOKEN (the default gh auth is a personal account)
+- ALL GitHub API calls MUST use \`-H "Authorization: Bearer $GH_TOKEN"\`
+- If the identity check fails, STOP immediately and report the error
+`;
+}
+
 // --- Token Management ---
 let cachedToken = null;
 let tokenExpiresAt = 0;
@@ -375,8 +405,7 @@ function buildBotChatTask(issue, comment, message, token) {
 
   return `You are the Isaac Lab Review Bot. A user is chatting with you via /bot command on PR #${prNum}.
 
-## Authentication
-export GH_TOKEN="${token}"
+${identityCheckBlock(token)}
 
 ## Context
 - PR: #${prNum} "${issue.title.replace(/"/g, '\\"')}"
@@ -624,6 +653,8 @@ function buildReviewTask(pr, token) {
 
 Your job: perform an exhaustive, implementation-level code review of PR #${prNum} on isaac-sim/IsaacLab.
 
+${identityCheckBlock(token)}
+
 ## Review Philosophy
 
 **Be harsh. Be precise. Be right.**
@@ -716,13 +747,6 @@ Every PR proposes not just code, but an architectural decision. Your job is to e
 - Will the test catch regressions? If someone reintroduces this bug in 6 months, will this test catch it?
 
 **When tests are NOT required:** Pure refactoring covered by existing tests, doc-only changes, config/CI/build changes, trivial fixes (typos) with near-zero regression risk.
-
-## Authentication
-You MUST use this token for ALL GitHub API calls (this is the bot app token, NOT the user's personal token):
-export GH_TOKEN="${token}"
-
-For gh CLI commands, set: export GH_TOKEN="${token}"
-For curl: -H "Authorization: Bearer ${token}"
 
 ## PR Details
 - Number: #${prNum}
@@ -972,6 +996,22 @@ Use COMMENT event (never APPROVE/REQUEST_CHANGES). Use \\\`\\\`\\\`suggestion bl
 
 **Inline comment format:** One sentence stating the issue → evidence → fix. No filler. No hedging. No "consider" or "might want to."
 
+**CRITICAL for inline comments to appear on specific lines:**
+- \`line\` must be the line number in the NEW version of the file (right side of diff)
+- The line MUST appear in the PR diff (added or modified lines only)
+- Use \`side: "RIGHT"\` for comments on new/modified code
+- If a finding references a line NOT in the diff, put it in the review body instead
+- Example JSON payload:
+\`\`\`json
+{
+  "body": "## Review Summary\\n...",
+  "event": "COMMENT",
+  "comments": [
+    {"path": "src/file.py", "line": 42, "side": "RIGHT", "body": "🔴 **Critical:** ..."}
+  ]
+}
+\`\`\`
+
 ### Step 7: Update State
 After posting, update the state file:
 \`\`\`bash
@@ -1004,6 +1044,8 @@ function buildFollowUpReviewTask(pr, token, previousSha) {
 
   return `You are the Isaac Lab Review Bot. New commits have been pushed to PR #${prNum} which you previously reviewed.
 
+${identityCheckBlock(token)}
+
 ## Critical Rule: Minimal, targeted follow-up only
 
 This is NOT a full re-review. You are checking whether the new commits addressed your previous review comments and whether any new issues were introduced IN THE NEW CHANGES ONLY.
@@ -1014,9 +1056,6 @@ This is NOT a full re-review. You are checking whether the new commits addressed
 3. **If a previous concern was NOT addressed:** Do not re-post it. The original comment is still visible. Only comment if there's new context that changes your recommendation.
 4. **If new commits introduce NEW issues:** Post only those new findings, using the same standards as a full review (must be correct, actionable, worth the author's time).
 5. **Keep the review body extremely short.** If you must post, the summary should be 2-3 sentences max. No architecture section, no lengthy analysis.
-
-## Authentication
-export GH_TOKEN="${token}"
 
 ## PR Details
 - Number: #${prNum}
@@ -1096,8 +1135,7 @@ Report: PR number, whether you posted anything, and if so what new issues were f
 function buildCommentReplyTask(pr, comment, token) {
   return `You are the Isaac Lab Review Bot. An engineer has replied to one of your review comments on PR #${pr.number}.
 
-## Authentication
-export GH_TOKEN="${token}"
+${identityCheckBlock(token)}
 
 ## Context
 - PR: #${pr.number} "${pr.title.replace(/"/g, '\\"')}" by @${pr.user.login}
@@ -1141,8 +1179,7 @@ Keep replies concise and helpful. You're a collaborator, not an authority.`;
 function buildGeneralReplyTask(issue, comment, token) {
   return `You are the Isaac Lab Review Bot. An engineer mentioned you in a general comment on PR #${issue.number}.
 
-## Authentication
-export GH_TOKEN="${token}"
+${identityCheckBlock(token)}
 
 ## Context
 - PR: #${issue.number} "${issue.title.replace(/"/g, '\\"')}"

@@ -8,6 +8,34 @@ const AGENTS_DIR = path.join(__dirname, "..", "agents");
 const STATE_PATH = path.join(__dirname, "..", "state.json");
 const REPO = "isaac-sim/IsaacLab";
 
+// Import identity check from server
+function identityCheckBlock(token) {
+  return `## ⚠️ CRITICAL: Identity Verification (run this FIRST, before ANY GitHub write)
+
+Before posting ANY comment, review, reaction, or push to GitHub, you MUST verify you are authenticated as the bot:
+
+\`\`\`bash
+export GH_TOKEN="${token}"
+
+# Verify identity — this MUST show the bot app, NOT a personal account
+IDENTITY=$(curl -s -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/user | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('login','UNKNOWN'))" 2>/dev/null || echo "UNKNOWN")
+echo "Authenticated as: $IDENTITY"
+
+if [[ "$IDENTITY" != *"[bot]"* && "$IDENTITY" != *"bot"* ]]; then
+  echo "ERROR: Not authenticated as bot! Got: $IDENTITY"
+  echo "DO NOT proceed — all GitHub writes must come from the bot account."
+  exit 1
+fi
+\`\`\`
+
+**Rules:**
+- ALWAYS run \`export GH_TOKEN="${token}"\` before ANY \`gh\` CLI or \`curl\` command
+- NEVER use \`gh\` without first exporting GH_TOKEN (the default gh auth is a personal account)
+- ALL GitHub API calls MUST use \`-H "Authorization: Bearer $GH_TOKEN"\`
+- If the identity check fails, STOP immediately and report the error
+`;
+}
+
 function loadAgentPrompt(agentName) {
   const filePath = path.join(AGENTS_DIR, `${agentName}.md`);
   try {
@@ -43,10 +71,7 @@ function buildMultiAgentReviewTask(pr, token) {
 
 You will spawn 3 specialized sub-agents in PARALLEL, wait for all results, then synthesize them into one cohesive review.
 
-## Authentication
-export GH_TOKEN="${token}"
-
-This token is valid for ~1 hour. Pass it to sub-agents.
+${identityCheckBlock(token)}
 
 ## PR Details
 - Number: #${prNum}
@@ -146,8 +171,21 @@ For inline comments, use this structure:
 {
   "path": "path/to/file.py",
   "line": 42,
+  "side": "RIGHT",
   "body": "🔴 **Critical:** ..."
 }
+\`\`\`
+
+**CRITICAL for inline comments:**
+- \`line\` must be the line number in the NEW version of the file (right side of diff)
+- The line MUST appear in the PR diff (added or modified lines only)
+- Use \`side: "RIGHT"\` for comments on new/modified code
+- If a finding references a line NOT in the diff, put it in the review body instead (not as inline comment)
+- To find valid line numbers: look at the \`@@ -X,Y +Z,W @@\` hunk headers and count from Z
+
+**To verify a line is in the diff before posting:**
+\`\`\`bash
+gh pr diff ${prNum} --repo ${REPO} | grep -n "^+" | head -50  # Shows added lines with positions
 \`\`\`
 
 ## Step 5: Update State
