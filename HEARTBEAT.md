@@ -13,5 +13,9 @@ Quick check: `sudo supervisorctl status isaaclab-review-bot isaaclab-review-smee
 If either is not RUNNING, run: `sudo supervisorctl restart isaaclab-review-bot isaaclab-review-smee`
 Only alert if restart fails.
 
+## Telegram Connection Check
+Run `bash /home/horde/.openclaw/workspace/scripts/telegram-health.sh`
+If output is TELEGRAM_OK — skip. If TELEGRAM_UNHEALTHY or RESTART_FAILED — alert immediately.
+
 ## Training Campaign Quick Check
 Run `bash /home/horde/IsaacLab/training_campaign/watchdog.sh` — if it says CAMPAIGN_DEAD, restart it (the script handles this automatically). Only alert if RESTART_FAILED.

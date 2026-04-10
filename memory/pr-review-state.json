@@ -1,0 +1,10 @@
+{
+  "arena-573": {
+    "pr": "isaac-sim/IsaacLab-Arena#573",
+    "title": "Make no-overlap a built-in solver behavior",
+    "lastReviewedSha": "620cf73b3923638ba9c338751d9d4de64cedae30",
+    "lastReviewedAt": "2026-04-10T12:41:00Z",
+    "status": "approved",
+    "notes": "Post-review commits addressed main concern (solver/validation asymmetry). clearance_m now applied uniformly. Loop simplified to single flat iteration with good gradient-coupling docs. Hardcoded slope=10000 and O(n²) notes were minor suggestions, acceptable as-is. No new issues found."
+  }
+}

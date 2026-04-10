@@ -1,0 +1,24 @@
+{
+  "arena-557": {
+    "pr": 557,
+    "repo": "isaac-sim/IsaacLab-Arena",
+    "title": "Fix CI subprocess test hangs",
+    "author": "xyao-nv",
+    "lastReviewedSha": "f41979d57be17fe12d9d62bf327f1b6e46267a3f",
+    "lastReviewedAt": "2026-04-10T16:19:35Z",
+    "reviewCount": 3,
+    "status": "no-new-issues",
+    "notes": "Follow-up #3: single doc-only change - added note in dexsuite_lift evaluation docs that Newton-trained model fails to grasp/lift cube when evaluated with PhysX. No code changes, no issues."
+  },
+  "isaaclab-5214": {
+    "pr": 5214,
+    "repo": "isaac-sim/IsaacLab",
+    "title": "Adds initial support for the Kamino solver",
+    "author": "AntoineRichard",
+    "lastReviewedSha": "8abebd2b1088b010293f4541d6b1e5d55e54be6b",
+    "lastReviewedAt": "2026-04-10T07:34:00Z",
+    "reviewCount": 1,
+    "status": "no-new-issues",
+    "notes": "Follow-up: 4 new commits since initial review (dynamics_preconditioning added, config refactored to to_solver_config(), stale MuJoCo-only comments fixed, deferred graph warm-up fix). Default tolerances mismatch (1e-6 defaults vs 1e-4 presets) and graph conditionals concerns from prior review not addressed but already communicated. No new issues in latest changes."
+  }
+}

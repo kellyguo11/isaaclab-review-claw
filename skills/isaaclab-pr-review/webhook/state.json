@@ -1,0 +1,386 @@
+{
+  "3895": {
+    "status": "reviewed",
+    "title": "Adds multirotor vision-based navigation task and acceleration, velocity and position controllers",
+    "author": "Zwoelf12",
+    "last_commit_sha": "e91af1ee8c06cd35b2d15e16d9ae88b9d7dd8197",
+    "reviewedAt": "2026-04-10T11:43:26.756Z",
+    "notes": "Follow-up: e91af1ee is only a merge of develop into the feature branch. No changes to any PR files (drone_arl, arl_robot, thrust_actions, lee controllers, etc). All 29 intermediate commits are develop-side merges. Already APPROVED by kellyguo11 (2026-02-25). No follow-up comment needed."
+  },
+  "4674": {
+    "status": "reviewed",
+    "reviewId": 4084343274,
+    "reviewedAt": "2026-04-09T17:43:00Z",
+    "title": "Add RenderingModeCfg for setting Rendering Settings",
+    "author": "matthewtrepte",
+    "verdict": "COMMENT",
+    "last_commit_sha": "371becd0cae8e58cc3f27856ab589e430cc0f751",
+    "notes": "Follow-up review of 371becd0. Changes: doc cleanup, improved docstrings for renderer_cfg/visualizer_cfg, removed redundant RTXRendererCfg.rendering_mode, KitVisualizerCfg now defaults rendering_mode to 'performance'. New bug found: missing space in app_launcher.py help text ('Renderersand'). Previous concerns still open: renderer_type None vs default dispatch, viser sys.path hack, unrelated physx_scene_data_provider methods, carb_settings equivalent still TODO. Newton defaults issue was fixed in prior push."
+  },
+  "4822": {
+    "status": "reviewed",
+    "reviewId": 4089856843,
+    "reviewedAt": "2026-04-10T13:13:31Z",
+    "title": "[Newton] Implements Frame Transformer Sensor",
+    "author": "camevor",
+    "verdict": "COMMENT",
+    "last_commit_sha": "61c83b197fc8387bbd6567a9db35610cc7efe5fc",
+    "notes": "Follow-up review (3 commits since b7f551a). All AntoineRichard feedback addressed: transform_multiply simplified to * operator, deleted comment restored. PR approved by AntoineRichard. Benchmarks posted by author (42% step-time improvement at 2048 envs). Remaining non-blocking: (1) quaternion convention change (wxyz\u2192xyzw) not documented in changelog - could break migrating users, (2) FrameTransformerData.__init__ sets _target_frame_names=None but property returns it without guard, (3) Newton changelog date 0.5.11 says 2026-04-07 but commits are 04-08 through 04-10."
+  },
+  "4946": {
+    "status": "reviewed",
+    "reviewId": 4077379420,
+    "reviewedAt": "2026-04-08T18:34:08Z",
+    "title": "add claude pr review skills",
+    "author": "pascal-roth",
+    "verdict": "COMMENT",
+    "notes": "Solid set of 5 Claude agent skills for automating maintainer workflows. Key feedback: (1) git stash race condition in bug-reproduce - unconditional pop can error or pop unrelated stash, (2) sandbox/network note missing from all git push steps, (3) self-review step needed before pushing, (4) post-fix verification should be explicit workflow step, (5) gh CLI dependency not declared in most skills, (6) heredoc indentation bug in pr-respond commit message template."
+  },
+  "4967": {
+    "status": "reviewed",
+    "reviewId": 4080924211,
+    "reviewedAt": "2026-04-09T08:46:20Z",
+    "title": "Transitions raycaster to warp backend",
+    "author": "pascal-roth",
+    "verdict": "COMMENT",
+    "last_commit_sha": "a5507fff951e2684dab8f1f37968e09c8d208b1d",
+    "followUpAt": "2026-04-10T12:41:00Z",
+    "notes": "Follow-up review (21 commits from d1c4d4e to a5507ff). MAJOR CHANGES: (1) Kernel consolidation - raycast_mesh_masked_kernel and raycast_camera_mesh_masked_kernel merged into single unified kernel in utils/warp/kernels.py with return_distance/return_normal flags; RayCaster passes dummy buffers with flags=0, RayCasterCamera uses return_distance=1. (2) quat_yaw_only BUG FIXED - changed from incorrect 'zero x,y and renormalize' to proper atan2-based yaw extraction, now correct for all orientations including non-zero pitch/roll. (3) CHANGELOG consolidation - all incremental 4.5.28-4.5.32 entries merged into single 4.5.28 entry, version in extension.toml reverted to 4.5.28. (4) Extensive test coverage added: raycast_mesh_masked_kernel return flag combinations, env_mask behavior, quat_yaw_only regression tests, alignment mode tests (world/base/yaw), drift reset tests, depth clipping independence, frame counter, set_intrinsic_matrices warp refresh, image_mesh_ids correctness. GREPTILE PRIOR COMMENTS: P1 API change (wp.array return type) is intentional and documented; P2 dead torch views (_pos_w_torch etc) still present but harmless; P1 mesh offset subtraction is pre-existing code not introduced by this PR; P2 dummy (1,1) buffers documented and guarded. NO NEW ISSUES - no follow-up comment needed."
+  },
+  "5049": {
+    "status": "reviewed",
+    "title": "Add surface deformable support and migrate deformable API to isaaclab_physx",
+    "author": "mmichelis",
+    "lastReviewedSha": "35e16fa9f4f1f1d77263aa998b71661f3f596a46",
+    "reviewedAt": "2026-04-10T14:47:00.000Z",
+    "reviewCount": 2,
+    "notes": "Follow-up 2 (234eb2d\u219235e16fa): 3 files changed. (1) wrappers_cfg.py: except Exception\u2192except ImportError \u2014 fixes our Warning #1. (2) schemas_cfg.py: docstring cleanup only (raw string for backslash, unit format). (3) run_deformable_object.rst: tutorial line number updates. CRITICAL video_recording missing from setup.py still OPEN but PR already APPROVED by AntoineRichard. No new issues introduced. No follow-up comment posted."
+  },
+  "5098": {
+    "status": "reviewed",
+    "reviewId": 4088588536,
+    "reviewedAt": "2026-04-10T09:14:56Z",
+    "title": "Adds friction/restitution index APIs and unify material randomization across PhysX and Newton",
+    "author": "ooctipus",
+    "verdict": "COMMENT",
+    "last_commit_sha": "87e9cd2e1cd8a198085e4bd10d5bc04c87b6db52",
+    "notes": "Follow-up review (2 incremental commits). Collider offsets refactored from closures to clean _call_physx/_call_newton split. randomize_rigid_body_com now correctly passes body_ids. STILL OPEN: (1) CRITICAL create_rigid_body_view bug at line 258 - uses root_view instead of _physics_sim_view (flagged in every review), (2) unconditional add_model_change in _call_newton collider offsets (minor). Previous issues also still open: _call_newton material uses mask instead of index."
+  },
+  "5141": {
+    "status": "reviewed",
+    "title": "Adds optimizations for Isaac Lab Mimic data generation performance",
+    "author": "peterd-NV",
+    "last_commit_sha": "d893b6717f805b8d7c10f066368a47f543924208",
+    "reviewedAt": "2026-04-09T15:43:00Z",
+    "notes": "Follow-up: Only new PR commit since 668444cb is 4eef11c78f (increase datagen test timeouts 1000/2000->3000). Plus merge commits from develop. No new code issues. Previous P2 comments (redundant conditional, _run_script duplication) were actually already resolved before 668444cb - those comments were stale. Remaining open concerns from initial review: (1) compression_opts=2 hardcoded for all users, (2) base class write_episode signature still diverged. Both are minor/pre-existing."
+  },
+  "5175": {
+    "status": "reviewed",
+    "reviewedAt": "2026-04-09T23:55:08Z",
+    "title": "Adds support for gear insertion with Flexiv Rizon 4s",
+    "author": "shauryadNv",
+    "verdict": "COMMENT",
+    "last_commit_sha": "ec1a13a414e2399a2592be1a7d0f1cc0971a2ce1",
+    "draft": true,
+    "notes": "Follow-up review of ec1a13a4 (2 commits since 4dfee2dc). Changes are parameter tuning only: (1) quaternion noise defaults changed from 0.0 to \u00b11\u00b0 (0.01745 rad) in base config and ResetSampledQuaternionNoiseModelCfg, (2) reward ramp steps reduced from 512k to 250k for both EE-gear keypoint tracking rewards. CRITICAL BUG STILL OPEN: keypoint_ee_gear_error/keypoint_ee_gear_error_exp reward terms in base RewardsCfg still crash UR10e envs - missing end_effector_body_name/grasp_rot_offset/gear_offsets_grasp params only populated in Rizon4s __post_init__. Also still open: obs noise doubled \u00b15mm\u2192\u00b110mm in base, is_close variable inverted, import carb in hot path, ~90% code duplication between reward classes, commented-out action reward. No follow-up comment posted - changes are minor tuning, critical bug already flagged, PR still in draft.",
+    "followUpAt": "2026-04-10T16:51:26Z"
+  },
+  "5177": {
+    "status": "reviewed",
+    "reviewedAt": "2026-04-10T11:11:00Z",
+    "title": "Simplify preset resolution with single-pass resolve_presets",
+    "author": "ooctipus",
+    "verdict": "COMMENT",
+    "last_commit_sha": "2813d1394c89a95d22cba99255c070da7129909b",
+    "notes": "Follow-up review (3 new commits: c1d2aa7e-2813d139). P1 infinite loop bug FIXED - cycle detection via id()-based seen set in both root and nested resolve paths, with ValueError on cycle. Tests added for both nested and root cycles. Hydra simplified: removed _HYDRA_AVAILABLE/_require_hydra (hard dependency now), inlined _extract_preset_names, removed _apply_node helper, cleaned _parse_val. No new issues found. Remaining minor: set iteration order for selected presets is non-deterministic (latent, not practical), CHANGELOG missing migration guidance per greptile suggestion. Both non-blocking."
+  },
+  "5178": {
+    "sha": "bc97e18b41247931b2b9b9ab6c6c7f77ec887543",
+    "reviewed_at": "2026-04-10T16:21:01.299Z",
+    "status": "approved_by_reviewer",
+    "note": "Follow-up: all review comments addressed. UsdUtils moved to top-level import, double-try removed, changelogs updated. PR approved by AntoineRichard."
+  },
+  "5179": {
+    "status": "reviewed",
+    "reviewId": 4086340169,
+    "reviewedAt": "2026-04-10T10:11:00Z",
+    "title": "Refactors Newton XformPrimView: proper local poses, warp-native API, and shared contract tests",
+    "author": "ooctipus",
+    "verdict": "COMMENT",
+    "last_commit_sha": "31119ce53246ca8b843801d054c06aa75ae8b84d",
+    "notes": "Follow-up review (5 new commits: c1c70ea-31119ce). P1 list(indices) bug FIXED - all views now accept wp.array indices consistently. Changelog class refs FIXED. New: RayCaster refactored to spawn its own Xform child (RayCasterXformCfg), all locomotion configs updated, backward compat via auto-detection of physics prims. Newton view deferred init via PhysicsEvent.PHYSICS_READY. omni.physics.tensors dependency removed from ray_cast_utils. No new issues found - all previous concerns addressed."
+  },
+  "5180": {
+    "status": "reviewed",
+    "reviewedAt": "2026-04-09T06:13:00Z",
+    "title": "Fix randomize_actuator_gains zeroing explicit actuator gains",
+    "author": "ooctipus",
+    "verdict": "COMMENT",
+    "last_commit_sha": "ccdb45d9473ee066c2f5113d7ad49c380f90b42d",
+    "notes": "Initial review flagged missing regression test as main concern. Follow-up: new commit ccdb45d9 is only a merge of develop into the branch resolving version conflicts (4.5.27->4.5.28). The actual fix (33c1c4e5) is unchanged. PR approved by AntoineRichard. No new comments or issues. Still missing regression test but that is non-blocking per maintainer approval."
+  },
+  "5188": {
+    "status": "approved",
+    "reviewId": 4077379682,
+    "reviewedAt": "2026-04-08T18:34:10Z",
+    "title": "Add release version to benchmark output",
+    "author": "kellyguo11",
+    "verdict": "APPROVE",
+    "notes": "Clean additive change. Reads root VERSION file and records as isaaclab_release in benchmark output. Path traversal correct, defensive error handling consistent with existing style, backward compatible. Minor nit about reusing _REPO_ROOT in _get_git_info. PR title still mentions extension.toml versions that were removed."
+  },
+  "5199": {
+    "status": "reviewed",
+    "reviewedAt": "2026-04-08T21:32:00Z",
+    "title": "Caches warp-to-torch views to deduplicate conversions per step",
+    "verdict": "COMMENT",
+    "last_commit_sha": "c81066b0cc55e0bfb88abf924c3fd2e07a270da0",
+    "notes": "Initial review flagged missing tests as main concern. Follow-up: author added comprehensive test suite (cache hit identity, zero-copy verification, reallocation invalidation, multi-field independence, caching disabled, frozen-owner fallback). All requested test scenarios covered. No new issues in incremental diff. Remaining minor suggestions (non-warp attribute test, docstring notes on thread safety and pointer reuse assumption) are non-blocking."
+  },
+  "5201": {
+    "status": "reviewed",
+    "reviewId": 4077357202,
+    "reviewedAt": "2026-04-08T18:30:51Z",
+    "title": "feat: make IsaacLab pip/uv installable via workspace meta-package",
+    "author": "lgulich",
+    "verdict": "COMMENT",
+    "notes": "Strong PR making IsaacLab pip/uv installable. Key feedback: (1) starlette dep dropped silently, (2) isaaclab_mimic and isaaclab_contrib not in workspace - needs docs, (3) version pinning drift risk with dual extension.toml + pyproject.toml sources, (4) bundled .kit files are copies creating maintenance burden, (5) unsafe-best-match has security implications for downstream users. Positive: clean PEP 621 migration, proper inter-package deps, isaacsim as first-class dep, good fallback patterns."
+  },
+  "5205": {
+    "status": "approved",
+    "reviewId": 4077303322,
+    "reviewedAt": "2026-04-08T18:22:46Z",
+    "title": "fix: support PreviewSurface binding in kitless mode",
+    "author": "eric-heiden",
+    "verdict": "APPROVE",
+    "notes": "Clean kitless fallback using pure USD APIs for UsdPreviewSurface creation and MaterialBindingAPI binding. One cosmetic nit about dead binding_strength variable in kitless path."
+  },
+  "5207": {
+    "status": "approved",
+    "reviewId": 4077302832,
+    "reviewedAt": "2026-04-08T18:22:41Z",
+    "title": "Fixes broken VideoRecorder test imports and config field names",
+    "author": "AntoineRichard",
+    "verdict": "APPROVE",
+    "notes": "Clean bugfix for broken test from #5011. Fixed importlib file loader \u2192 package import, config field names to match VideoRecorderCfg (env_render_mode, camera_position, camera_target, window_width, window_height), and patch() \u2192 patch.dict(sys.modules) for optional deps. Test-only change, no backward compat concerns."
+  },
+  "5208": {
+    "status": "reviewed",
+    "reviewId": 4077320207,
+    "reviewedAt": "2026-04-08T18:20:00Z",
+    "title": "Compute mass from collision shapes for zero-mass moving bodies in Newton",
+    "author": "Kripner",
+    "verdict": "COMMENT",
+    "notes": "Good bug fix for zero-mass moving bodies crashing Newton/MuJoCo finalize. Main feedback: missing parallel-axis theorem + shape_transform when combining inertia from multiple collision shapes. Works fine for single-shape bodies (Franka fingers) but general case needs correction."
+  },
+  "5211": {
+    "status": "approved",
+    "reviewId": 4082003204,
+    "reviewedAt": "2026-04-09T11:45:17Z",
+    "title": "Pins sphinx<9 to fix sphinx-multiversion compatibility",
+    "author": "kellyguo11",
+    "verdict": "APPROVE",
+    "last_commit_sha": "dfd40d9c2dc68bd4612d74eb872815606da88b75",
+    "notes": "One-line pin of sphinx>=7.0,<9 in docs/requirements.txt to fix CI breakage from Sphinx 9.0 breaking Config.read() API (keyword-only params) which breaks unmaintained sphinx-multiversion==0.2.4. Clean fix, already approved by @AntoineRichard. Noted sphinx-multiversion last released 2020 \u2014 suggested tracking migration to maintained fork."
+  },
+  "5213": {
+    "status": "reviewed",
+    "reviewId": 4082371513,
+    "reviewedAt": "2026-04-09T12:45:33Z",
+    "title": "Pins Python version to 3.12 across all packages",
+    "author": "AntoineRichard",
+    "verdict": "REQUEST_CHANGES",
+    "last_commit_sha": "a5982990fdc9109a3140623dbcd93a7e008025b4",
+    "notes": "Python 3.12 pin across all setup.py files, CI, and docs. Key issues: (1) license-check CI broken - workflow bumped to Python 3.12 but still installs isaacsim==5.1.0 which only has 3.11 wheels, (2) classifiers still list Isaac Sim 5.0.0/5.1.0 which require Python 3.11 - contradicts python_requires>=3.12, (3) isaaclab_contrib classifiers list Isaac Sim 4.5.0 (3.10) and 5.0.0 (3.11) with python_requires>=3.12 - incompatible. Mechanical changes are correct and consistent, just needs CI fix and classifier cleanup."
+  },
+  "5214": {
+    "status": "reviewed",
+    "reviewId": 4083427226,
+    "reviewedAt": "2026-04-09T15:16:47Z",
+    "title": "Adds initial support for the Kamino solver",
+    "author": "AntoineRichard",
+    "verdict": "COMMENT",
+    "last_commit_sha": "f7d8e2955f6ac52cbf19d560a8ea15d6568f461a",
+    "notes": "Kamino P-ADMM solver integration for Newton physics. Adds KaminoSolverCfg, manager-side init/reset/CUDA-graph handling, and presets for 7 tasks. Key feedback: (1) default PADMM tolerances (1e-6) are 100x tighter than all shipped presets (1e-4) - could surprise users, (2) padmm_use_graph_conditionals=False in all presets means 100 iterations always unrolled in CUDA graph even when converged early, (3) all 7 presets are near-identical - could extract shared factory, (4) _forward_kamino runs eagerly outside graph - debug logging suggested for diagnosing perf drops from frequent resets. Previously flagged issues (debug_mode crash, changelog version) already fixed in latest commit."
+  },
+  "5215": {
+    "status": "reviewed",
+    "reviewId": 4087160026,
+    "reviewedAt": "2026-04-10T04:31:11Z",
+    "title": "Fixes multi-GPU device resolution in AppLauncher",
+    "author": "kellyguo11",
+    "verdict": "COMMENT",
+    "last_commit_sha": "b6231907f920bbcea45142a02c3e8e102692db2a",
+    "notes": "Follow-up #2 of b6231907 (1 commit since 99ee976a). Previous concern fully addressed: legacy LOCAL_RANK overrides removed from all 3 benchmark scripts, replaced with env_cfg.sim.device. All 6 scripts (3 benchmark + 3 training) now consistently use if not args_cli.distributed guard. Remaining changes are lint (unused import, PEP 8 blank lines, trailing whitespace). No new issues. LGTM."
+  },
+  "5220": {
+    "status": "reviewed",
+    "title": "Adds Installation CI",
+    "author": "myurasov-nv",
+    "last_commit_sha": "a3fc559deedbfd46c26f98d31ac0edb523d26fcf",
+    "reviewedAt": "2026-04-10T06:04:46Z",
+    "verdict": "COMMENT",
+    "notes": "Follow-up review of a3fc559 (incremental from 7b714fd). Changes: Documentation-only update in tools/install_ci/run \u2014 fixed stale references from cli to run in module docstring and argparse epilog examples, added new usage examples for --gpu, marker filtering (-m uv, -m \"slow and gpu\"), and bug ID filtering (-m nvbugs_5968136). No logic changes. No new issues."
+  },
+  "5226": {
+    "status": "reviewed",
+    "reviewId": 4089510052,
+    "reviewedAt": "2026-04-10T12:14:15Z",
+    "title": "Replace sphinx-multiversion with per-branch docs builds",
+    "author": "AntoineRichard",
+    "verdict": "COMMENT",
+    "last_commit_sha": "431658ffaabbc46f2a4025334c986073fe4b1860",
+    "notes": "Replaces unmaintained sphinx-multiversion with per-branch CI builds and JSON-driven version switcher (NumPy/CPython pattern). Key feedback: (1) CRITICAL: versions.json race condition when multiple refs deploy simultaneously - concurrency group is per-ref not per-deploy, (2) shell variable injection in Python heredoc in deploy step, (3) migration workflow keep_files:false is destructive if accidentally re-triggered, (4) tag trigger pattern broader than intended, (5) version-switcher.js uses deprecated XMLHttpRequest. Clean architecture overall with thorough design spec."
+  },
+  "reviewed": {
+    "5209": {
+      "title": "Fixes typo correction for IsaacSim Docker Version",
+      "author": "thdhyan",
+      "action": "APPROVED",
+      "reason": "Typo fix: ISAACSSIM_VERSION -> ISAACSIM_VERSION in docker/.env.base + contributor addition",
+      "timestamp": "2026-04-08T18:28:00Z"
+    }
+  },
+  "arena-456": {
+    "status": "approved",
+    "reviewId": 4080191042,
+    "reviewedAt": "2026-04-09T06:44:13Z",
+    "title": "Doc/explain resume flag",
+    "author": "viiik-inside",
+    "verdict": "APPROVE",
+    "repo": "isaac-sim/IsaacLab-Arena",
+    "last_commit_sha": "c06aecd03187b9b393566b5d8209c0c9181a38a9",
+    "followUpAt": "2026-04-09T18:43:00Z",
+    "notes": "Docs-only PR adding 'Resuming from a Checkpoint' sections to RL and Dexsuite lift training guides. Explains --resume, --load_run, --checkpoint flags with code examples. Also includes minor trailing whitespace fix in multi-GPU section. Already approved by @xyao-nv. Follow-up: only new commit c06aecd0 is a merge of main into branch with no changes to PR files. Approval stands."
+  },
+  "arena-526": {
+    "status": "reviewed",
+    "reviewId": 4081300555,
+    "reviewedAt": "2026-04-09T09:45:49Z",
+    "title": "Humanize concepts docs",
+    "author": "alexmillane",
+    "verdict": "COMMENT",
+    "repo": "isaac-sim/IsaacLab-Arena",
+    "notes": "Major docs restructure: replaces AI-generated concept pages with human-written, more concise versions. Reorganizes concepts into scene/, task/, embodiment/, policy/ subdirectories. Deletes 9 old pages, adds 8 new ones. Spotted typos (assmble, Recordering), grammar issues, and two potentially incorrect API references (how_open, Placeable affordance). Already approved by @cvolkcvolk."
+  },
+  "arena-544": {
+    "status": "approved",
+    "reviewId": 4082008315,
+    "reviewedAt": "2026-04-09T11:45:58Z",
+    "title": "Remove RLFramework enum, replace with plain string",
+    "author": "cvolkcvolk",
+    "verdict": "APPROVE",
+    "last_commit_sha": "6901d41be6f94bcf238907da1790eb3d933e8805",
+    "notes": "Clean simplification removing unnecessary RLFramework enum indirection. Replaces enum+method with plain string parameter. Improves validation (ValueError in __init__ vs assert in build_registered). Good docstring additions. All call-sites and docs updated consistently, no stale references remain."
+  },
+  "arena-564": {
+    "status": "approved",
+    "reviewId": 4082986754,
+    "reviewedAt": "2026-04-09T14:15:16Z",
+    "title": "Fix incorrect eval_config.json in DexSuite lift docs",
+    "author": "cvolkcvolk",
+    "verdict": "APPROVE",
+    "last_commit_sha": "20ec3f6d6829c357d95227db91c1d9d15702baf3",
+    "repo": "isaac-sim/IsaacLab-Arena",
+    "notes": "Docs-only fix replacing fabricated eval_config.json schema (policy_runner_args/evaluations) with the actual eval_runner.py schema (jobs array with name, arena_env_args, policy_type, policy_config_dict, num_steps). Also correctly moves --presets newton to CLI invocation since it is a CLI arg, not a job config field. Verified against Job.from_dict(), JobManager, and existing config examples in repo."
+  },
+  "prs": {
+    "5161": {
+      "last_reviewed_sha": "0a3d61cb46c99db50cbdeddc1d9f9bc46ae695dd",
+      "last_review_time": 1775760434.8755116,
+      "status": "approved_by_bot",
+      "notes": "Follow-up: duplicates fixed, dismissed stale CHANGES_REQUESTED, posted LGTM comment. Also has human APPROVED from ooctipus."
+    },
+    "5202": {
+      "lastReviewedSha": "0eaba914db1f29ac9330c6876d273d72cb15a07b",
+      "lastReviewedAt": "2026-04-09T18:13:00Z",
+      "reviewId": 4077307036,
+      "status": "follow-up-checked",
+      "notes": "Follow-up review: all 3 original suggestions addressed. Caching moved to AssetBase, uses @functools.cache, covers tendons + RigidObject. No new issues found."
+    }
+  },
+  "arena-557": {
+    "status": "reviewed",
+    "reviewId": 4080056043,
+    "reviewedAt": "2026-04-10T03:30:00Z",
+    "title": "Fix CI subprocess test hangs",
+    "author": "xyao-nv",
+    "verdict": "COMMENT",
+    "last_commit_sha": "ad301dfabe88074ada8116a111f59c707883cbf0",
+    "repo": "isaac-sim/IsaacLab-Arena",
+    "notes": "Follow-up: ad301dfa is docstring-only rewording in subprocess.py addressing Alex Millane's review comment about confusing phrasing of start_new_session=True. Bot already acknowledged with 'Thanks! \ud83d\ude4f'. No new issues. All prior feedback (process-group kill gap, greptile env mutation/race concerns) still open but addressed in cherry-pick PR #569."
+  },
+  "arena-569": {
+    "status": "reviewed",
+    "reviewId": 4086416416,
+    "reviewedAt": "2026-04-10T00:57:41Z",
+    "title": "cherrypick 557 and add orphan cleanup",
+    "author": "xyao-nv",
+    "verdict": "COMMENT",
+    "last_commit_sha": "e4d49118a768220a0b418182803546083e852901",
+    "repo": "isaac-sim/IsaacLab-Arena",
+    "notes": "Cherry-pick of PR #557 fixing CI subprocess test hangs. Multi-layered approach: (1) SimulationAppContext force-exit skips app.close() when ISAACLAB_ARENA_FORCE_EXIT_ON_COMPLETE=1, uses _kill_child_processes() via /proc walk, (2) run_subprocess gets configurable timeout (ISAACLAB_ARENA_SUBPROCESS_TIMEOUT env, default 600s, CI sets 900s), start_new_session=True for process isolation, (3) _kill_kit_orphans() sweeps system for reparented Kit processes (telemetry, windowing), (4) test parametrization replaces nested loops for better per-config isolation. Feedback: process-group kill gap (grandchildren can escape /proc walk), _kill_kit_orphans is system-wide not scoped to descendants, dropped background=None kwarg in gr1_open_microwave test, TimeoutExpired should kill process group before orphan sweep, SubprocessError loses exception chain context."
+  },
+  "arena-570": {
+    "status": "reviewed",
+    "reviewId": 4087817034,
+    "reviewedAt": "2026-04-10T06:35:52Z",
+    "title": "[CI] Add retry if timeout",
+    "author": "xyao-nv",
+    "verdict": "COMMENT",
+    "last_commit_sha": "cb7312056d75387f30ac545e6ed8a2108eebb756",
+    "repo": "isaac-sim/IsaacLab-Arena",
+    "notes": "Retry on Kit startup deadlock for CI reliability. Refactors subprocess.run into _run_once helper, adds configurable retry via ISAACLAB_ARENA_SUBPROCESS_MAX_RETRIES env (default 1). Only retries on TimeoutExpired, non-zero exits still fail fast. Key feedback: (1) subprocess.run process.kill() only kills child PID, not process group \u2014 with start_new_session=True grandchildren (Kit shader compiler, GPU workers) survive as orphans holding GPU resources between retries, need os.killpg or manual Popen for group kill, (2) docstring claims orphan cleanup but no cleanup code exists. Suggested switching _run_once to manual Popen to get PID access for process group kill on timeout."
+  },
+  "arena-559": {
+    "status": "approved",
+    "reviewId": null,
+    "reviewedAt": "2026-04-09T23:51:06Z",
+    "title": "[CI] Revert eval_runner tests",
+    "author": "xyao-nv",
+    "verdict": "APPROVE",
+    "last_commit_sha": "f48d03d552875f1546b959cf63a91577a9aeb9ef",
+    "repo": "isaac-sim/IsaacLab-Arena",
+    "notes": "Follow-up: branch was force-pushed (original approved commit b59c56280d49 gone). Current diff is same +7/-7 in test_eval_runner.py: 5x skip->with_subprocess, plus new change swapping galileo_pick_and_place -> put_item_in_fridge_and_close_door (GR1PutAndCloseDoorEnvironment.name, valid env). Environment swap replaces costly Galileo scene with lighter kitchen scene for CI speed. Previous review concern (run_eval_runner_and_check_no_failures lacks timeout/start_new_session) is pre-existing code not touched by this PR. No new issues \u2014 no follow-up comment posted."
+  },
+  "arena-572": {
+    "status": "approved",
+    "reviewId": 4088421786,
+    "reviewedAt": "2026-04-10T08:42:51Z",
+    "title": "Update newton example doc to clearly state failure using physx eval",
+    "author": "qianl-nv",
+    "verdict": "APPROVE",
+    "last_commit_sha": "578afaeb564b24e48ab781cf9aebc49d756f0a25",
+    "repo": "isaac-sim/IsaacLab-Arena",
+    "notes": "Doc-only PR. Expands existing note in dexsuite_lift evaluation docs to explicitly state that the Newton-trained model completely fails to grasp/lift when evaluated with PhysX. Addresses QA request (nvbug 6063011). One optional nit about adverb placement ambiguity."
+  },
+  "arena-571": {
+    "status": "reviewed",
+    "reviewId": 4089059174,
+    "reviewedAt": "2026-04-10T10:41:00Z",
+    "title": "Refactor locomanipulation task",
+    "author": "alexmillane",
+    "verdict": "COMMENT",
+    "last_commit_sha": "53fe37f1b17180246b17c3a3f8b211ba70768707",
+    "notes": "Follow-up review (3 commits since initial). FIXED: NoneType crashes in object_base.py/object_set.py, debug prints in terminations.py and task file, deleted problematic test. STILL OPEN: docker tag latest1, HEADLESS=False in test_object_on_termination.py. NEW ISSUE: ~80 lines commented-out code in g1_locomanip_pick_and_place_task.py with 11 orphaned imports."
+  },
+  "arena-575": {
+    "status": "approved",
+    "reviewId": 4090088818,
+    "reviewedAt": "2026-04-10T13:48:23Z",
+    "title": "Clean up type annotation in the environment files.",
+    "author": "alexmillane",
+    "verdict": "APPROVE",
+    "last_commit_sha": "2c746cacf1a15103b2cb4093796a212b83c2421d",
+    "repo": "isaac-sim/IsaacLab-Arena",
+    "notes": "Systematic cleanup replacing TODO/NOTE comments with proper TYPE_CHECKING + from __future__ import annotations pattern across 19 environment files. Adds return type annotations to all get_env() methods. Consistent, correct, no issues found."
+  },
+  "5160": {
+    "status": "reviewed",
+    "title": "Adding Hydroelastic and SDF collision configuration to IsaacLab",
+    "author": "vidurv-nvidia",
+    "last_commit_sha": "3fca0dc9f394c9934de838ea3604c562bd261caf",
+    "reviewedAt": "2026-04-10T17:18:00Z",
+    "reviewCount": 2,
+    "notes": "Follow-up review (9 commits from b7c2c76 to 3fca0dc). PREVIOUS ISSUES STATUS: (1) CRITICAL to_dict None kwargs bug FIXED - now filters None values before passing to CollisionPipeline, (2) import re at module level FIXED in both newton_manager.py and newton_replicate.py, (3) target_voxel_size docstring still says takes precedence but both kwargs passed to build_sdf - minor doc issue only. NEW CHANGES: (1) _build_sdf_on_mesh returns early when mesh.sdf already exists instead of clear+rebuild - correct for shared-reference prototype pattern, (2) _create_sdf_collision_from_visual now respects HydroelasticCfg.shape_patterns via per-shape pattern matching and per-shape ShapeConfig construction, (3) instantiate_builder_from_stage now uses skip_mesh_approximation+load_visual_shapes and selective convex hull approximation matching newton_replicate path - necessary to preserve triangle meshes for SDF, (4) Newton visualizer: new show_collision, show_visual, show_inertia_boxes toggles in UI and config. Tests updated for SDF early-return behavior. No new issues found - no follow-up comment posted."
+  }
+}

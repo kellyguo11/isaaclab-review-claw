@@ -1,0 +1,61 @@
+# Retrain Failed Tasks - Summary
+Date: 2026-04-08
+
+## Result: BLOCKED — All 23 tasks could not be retrained
+
+### Root Cause
+The Isaac Sim installation at `/home/horde/IsaacSim/_build/linux-x86_64/release` is broken.
+During this session, a concurrent `build.sh -rx` process wiped the release directory.
+The rebuild failed at the premake5 step with two errors:
+1. First: `Permission denied: premake5` (fixed by adding +x permission)
+2. Then: `No Python settings for 'python_version' value 3` (build config issue, unfixable without repo changes)
+
+The result is a partially built release directory missing critical components needed to run Isaac Sim:
+- Extension pip_prebundle directories are empty
+- extscache is empty  
+- Native .so plugin dependencies can't resolve
+- Kit kernel extension loading fails for many extensions
+
+### Fixes Attempted
+1. **Fixed missing python binary** — The uv-created venv had no python symlink (the base python path changed). Created symlinks to `cpython-3.12.13`.
+2. **Fixed torch packaging bug** — `torch.ao.nn.intrinsic.quantized.dynamic.modules` was missing. Created stub module.
+3. **Fixed Kit kernel discovery** — Created `kit -> kit.pip_backup` symlink in isaacsim package, and `kit -> packman cache` symlink in release dir.
+4. **Recreated setup scripts** — `setup_conda_env.sh` and `python.sh` were wiped by the build. Recreated manually.
+5. **Patched Kit extension loader** — Modified `custom_importer.py` to fall back to scanning extension directories when `importlib.import_module` fails. This fixed `omni.physxfabric` import but more extensions kept failing due to missing native dependencies.
+
+### What's Needed to Unblock
+1. Fix the Isaac Sim build configuration issue (`No Python settings for 'python_version' value 3`)
+2. Run `build.sh -rx` to completion so the release directory is fully populated
+3. Alternatively, restore the release directory from a backup or re-download the Isaac Sim release artifacts
+4. Then re-run this retrain campaign
+
+### Previous Campaign Status
+Looking at `progress_develop.json`, all 23 tasks show as "completed" but `results_develop.json` shows they all **actually failed** (exit in 4-8 seconds). Their checkpoints were never generated, and none were uploaded to the GitHub release.
+
+### Tasks (all 23 blocked)
+**rl_games (6):**
+- Isaac-Ant-Direct-v0 (max_iter=300)
+- Isaac-Ant-v0 (max_iter=1000)
+- Isaac-AutoMate-Assembly-Direct-v0 (max_iter=100)
+- Isaac-AutoMate-Disassembly-Direct-v0 (max_iter=100)
+- Isaac-Cart-Double-Pendulum-Direct-v0 (max_iter=300)
+- Isaac-Forge-NutThread-Direct-v0 (max_iter=100)
+
+**rsl_rl (17):**
+- Isaac-Repose-Cube-Shadow-OpenAI-FF-Direct-v0 (max_iter=3000)
+- Isaac-TrackPositionNoObstacles-ARL-Robot-1-v0 (max_iter=500)
+- Isaac-Tracking-LocoManip-Digit-v0 (max_iter=500)
+- Isaac-Velocity-Flat-Anymal-B-v0 (max_iter=1000)
+- Isaac-Velocity-Flat-Anymal-C-Direct-v0 (max_iter=1000)
+- Isaac-Velocity-Flat-Anymal-C-v0 (max_iter=1000)
+- Isaac-Velocity-Rough-Anymal-B-v0 (max_iter=1000)
+- Isaac-Velocity-Rough-Anymal-C-Direct-v0 (max_iter=1000)
+- Isaac-Velocity-Rough-Anymal-C-v0 (max_iter=1000)
+- Isaac-Velocity-Rough-Anymal-D-v0 (max_iter=1000)
+- Isaac-Velocity-Rough-Cassie-v0 (max_iter=1000)
+- Isaac-Velocity-Rough-Digit-v0 (max_iter=1000)
+- Isaac-Velocity-Rough-G1-v0 (max_iter=1000)
+- Isaac-Velocity-Rough-H1-v0 (max_iter=1000)
+- Isaac-Velocity-Rough-Unitree-A1-v0 (max_iter=1000)
+- Isaac-Velocity-Rough-Unitree-Go1-v0 (max_iter=1000)
+- Isaac-Velocity-Rough-Unitree-Go2-v0 (max_iter=1000)

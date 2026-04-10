@@ -1,0 +1,52 @@
+[2026-04-06 18:02:40,338][isaaclab.app.app_launcher][WARNING] - The '--headless' CLI argument is deprecated. Omit '--viz' for default headless. If config visualizers are enabled and you want to force headless, use '--viz none'.
+[2026-04-06 18:02:40,338][isaaclab.app.app_launcher][INFO] - Using device: cuda:0
+[2026-04-06 18:02:40,339][isaaclab.app.app_launcher][INFO] - Loading experience file: /home/horde/IsaacLab/apps/isaaclab.python.headless.kit
+[2026-04-06 18:02:40,603][asyncio][DEBUG] - Using selector: EpollSelector
+[2026-04-06 18:02:40,634][omni.kit.registry.nucleus.registry_manager][INFO] - 'trusted' is not set for registry 'kit/default' in '/exts/omni.kit.registry.nucleus/registries'
+[2026-04-06 18:02:40,634][omni.kit.registry.nucleus.registry_manager][INFO] - 'trusted' is not set for registry 'kit/sdk' in '/exts/omni.kit.registry.nucleus/registries'
+[2026-04-06 18:02:40,634][omni.kit.registry.nucleus.registry_manager][INFO] - 'trusted' is not set for registry 'kit/prod/default' in '/exts/omni.kit.registry.nucleus/registries'
+[2026-04-06 18:02:40,634][omni.kit.registry.nucleus.registry_manager][INFO] - 'trusted' is not set for registry 'kit/prod/sdk' in '/exts/omni.kit.registry.nucleus/registries'
+[2026-04-06 18:02:46,971][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:46,976][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:46,979][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:46,983][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:46,986][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:46,989][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:46,993][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:46,996][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:46,999][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,003][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,006][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,009][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,013][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,016][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,019][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,022][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,026][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,029][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,033][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,037][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,041][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,044][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,048][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,051][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,056][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,060][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,063][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,067][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,070][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,073][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,077][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,080][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,084][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,087][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,092][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,096][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,101][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,106][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,112][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,117][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,121][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,125][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,130][packman.link][INFO] - Created symbolic link
+[2026-04-06 18:02:47,134][packman.link][INFO] - Created symbolic link

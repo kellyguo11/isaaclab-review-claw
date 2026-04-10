@@ -1,0 +1,68 @@
+# Training Campaign Plot Regeneration Summary
+Date: 2026-04-08 02:17 UTC
+
+## Data Sources
+- Original results: /home/horde/IsaacLab/training_campaign/results_develop.json
+- RSL RL rerun results: /home/horde/IsaacLab/training_campaign/rerun_rsl_rl_results.json
+- TensorBoard logs: /home/horde/IsaacLab/logs/{rsl_rl,rl_games,skrl,sb3}/
+
+## Results Summary (After Merging Rerun Data)
+| Workflow  | Success | Total | Rate   |
+|-----------|---------|-------|--------|
+| rl_games  | 43      | 49    | 87.8%  |
+| rsl_rl    | 33      | 50    | 66.0%  |
+| sb3       | 7       | 7     | 100.0% |
+| skrl      | 50      | 50    | 100.0% |
+|-----------|---------|-------|--------|
+| TOTAL     | 133     | 156   | 85.3%  |
+
+The RSL RL rerun fixed 28 previously failing tasks, bringing success rate from 10% to 66%.
+
+## Generated Plots
+
+1. **convergence_rsl_rl.png** (478 KB)
+   - 12 tasks plotted with reward curves
+   - Shows Train/mean_reward over iterations
+   - Includes smoothed curves for better visualization
+
+2. **convergence_rl_games.png** (404 KB) 
+   - 12 tasks plotted with reward curves
+   - Fixed: Previously 11KB/empty due to wrong TB path
+   - Now correctly reads from summaries/ subdirectory
+
+3. **convergence_skrl.png** (383 KB)
+   - 12 tasks plotted with reward curves
+   - Uses "Reward / Total reward (mean)" tag
+
+4. **convergence_sb3.png** (282 KB)
+   - 7 tasks plotted (all available)
+   - Uses rollout/ep_rew_mean tag from PPO_1/ subdirectory
+
+5. **success_rates.png** (75 KB)
+   - Left panel: Stacked bar showing success/fail counts
+   - Right panel: Success rate percentages by framework
+
+6. **timing_comparison.png** (94 KB)
+   - Left panel: Average training duration with std error bars
+   - Right panel: Box plot showing duration distribution
+
+7. **task_durations.png** (256 KB)
+   - Top 30 tasks ranked by training duration
+   - Color-coded by workflow
+   - Longest: Isaac-Repose-Cube-Shadow-Vision-Direct-v0 (19.2h, rsl_rl)
+
+## Fixes Applied
+- Fixed rl_games TB path: now reads from run_dir/summaries/
+- Fixed sb3 TB path: now reads from run_dir/PPO_1/
+- Added workflow-specific reward tag mapping:
+  - rsl_rl: Train/mean_reward
+  - rl_games: rewards/iter  
+  - skrl: Reward / Total reward (mean)
+  - sb3: rollout/ep_rew_mean
+- Added smoothing to convergence curves
+- Merged RSL RL rerun results into statistics
+
+## File Locations
+- Campaign plots: /home/horde/IsaacLab/training_campaign/plots/
+- Workspace copy: /home/horde/.openclaw/workspace/plots/
+- Plot script: /home/horde/IsaacLab/training_campaign/generate_plots_v2.py

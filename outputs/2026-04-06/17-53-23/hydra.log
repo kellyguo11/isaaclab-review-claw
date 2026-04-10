@@ -1,0 +1,8 @@
+[2026-04-06 17:53:23,474][isaaclab.app.app_launcher][WARNING] - The '--headless' CLI argument is deprecated. Omit '--viz' for default headless. If config visualizers are enabled and you want to force headless, use '--viz none'.
+[2026-04-06 17:53:23,475][isaaclab.app.app_launcher][INFO] - Using device: cuda:0
+[2026-04-06 17:53:23,476][isaaclab.app.app_launcher][INFO] - Loading experience file: /home/horde/IsaacLab/apps/isaaclab.python.headless.kit
+[2026-04-06 17:53:23,771][asyncio][DEBUG] - Using selector: EpollSelector
+[2026-04-06 17:53:23,877][omni.kit.registry.nucleus.registry_manager][INFO] - 'trusted' is not set for registry 'kit/default' in '/exts/omni.kit.registry.nucleus/registries'
+[2026-04-06 17:53:23,877][omni.kit.registry.nucleus.registry_manager][INFO] - 'trusted' is not set for registry 'kit/sdk' in '/exts/omni.kit.registry.nucleus/registries'
+[2026-04-06 17:53:23,877][omni.kit.registry.nucleus.registry_manager][INFO] - 'trusted' is not set for registry 'kit/prod/default' in '/exts/omni.kit.registry.nucleus/registries'
+[2026-04-06 17:53:23,877][omni.kit.registry.nucleus.registry_manager][INFO] - 'trusted' is not set for registry 'kit/prod/sdk' in '/exts/omni.kit.registry.nucleus/registries'

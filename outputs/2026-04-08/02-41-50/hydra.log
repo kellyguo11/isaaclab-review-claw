@@ -1,0 +1,3 @@
+[2026-04-08 02:41:50,455][isaaclab.app.app_launcher][WARNING] - The '--headless' CLI argument is deprecated. Omit '--viz' for default headless. If config visualizers are enabled and you want to force headless, use '--viz none'.
+[2026-04-08 02:41:50,455][isaaclab.app.app_launcher][INFO] - Using device: cuda:0
+[2026-04-08 02:41:50,456][isaaclab.app.app_launcher][INFO] - Loading experience file: /home/horde/IsaacLab/apps/isaaclab.python.headless.kit

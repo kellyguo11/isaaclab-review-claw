@@ -1,0 +1,12 @@
+{
+  "pr": 5220,
+  "repo": "isaac-sim/IsaacLab",
+  "title": "Adds Installation CI",
+  "author": "myurasov-nv",
+  "lastReviewedSha": "6008d5eaa3a598dc21c5e9fc0ef84faab5b5b222",
+  "lastReviewedAt": "2026-04-10T04:29:00Z",
+  "reviewCount": 2,
+  "followUpCount": 1,
+  "lastAction": "no-comment-needed",
+  "notes": "Follow-up #1: Incremental diff was a clean refactoring — extracted UV_Utils mixin into uv_utils.py, split smoke/heavy tests into separate files, added GPU training integration test. No new issues. Previous review items (dead PYTEST_ARGS, sys.path hack, os.pathsep) were all addressed in earlier commits."
+}

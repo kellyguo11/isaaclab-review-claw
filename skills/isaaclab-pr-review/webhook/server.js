@@ -43,29 +43,37 @@ const INSTALLATION_ID = config.installationId;
 // Every sub-agent task includes this pre-flight check to ensure
 // it posts as the bot app (not the user's personal gh account).
 function identityCheckBlock(token) {
-  return `## ⚠️ CRITICAL: Identity Verification (run this FIRST, before ANY GitHub write)
+  return `## 🛑 MANDATORY: Bot Authentication (MUST run before ANY GitHub operation)
 
-Before posting ANY comment, review, reaction, or push to GitHub, you MUST verify you are authenticated as the bot:
+**CRITICAL SAFEGUARD**: This prevents accidentally posting as the user's personal account.
 
 \`\`\`bash
+# Step 1: Set the bot token
 export GH_TOKEN="${token}"
 
-# Verify identity — this MUST show the bot app, NOT a personal account
+# Step 2: Verify identity — MUST be the bot app
 IDENTITY=$(curl -s -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/user | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('login','UNKNOWN'))" 2>/dev/null || echo "UNKNOWN")
 echo "Authenticated as: $IDENTITY"
 
-if [[ "$IDENTITY" != *"[bot]"* && "$IDENTITY" != *"bot"* ]]; then
-  echo "ERROR: Not authenticated as bot! Got: $IDENTITY"
-  echo "DO NOT proceed — all GitHub writes must come from the bot account."
+# Step 3: ABORT if not bot — this is a hard stop, no exceptions
+if [[ "$IDENTITY" != *"[bot]"* ]]; then
+  echo "╔════════════════════════════════════════════════════════════════╗"
+  echo "║  FATAL: NOT AUTHENTICATED AS BOT                              ║"
+  echo "║  Identity: $IDENTITY                                          ║"
+  echo "║  ABORTING — refusing to post as personal account              ║"
+  echo "╚════════════════════════════════════════════════════════════════╝"
+  # DO NOT CONTINUE — report this error and stop the task
   exit 1
 fi
+echo "✓ Bot authentication verified: $IDENTITY"
 \`\`\`
 
-**Rules:**
-- ALWAYS run \`export GH_TOKEN="${token}"\` before ANY \`gh\` CLI or \`curl\` command
-- NEVER use \`gh\` without first exporting GH_TOKEN (the default gh auth is a personal account)
-- ALL GitHub API calls MUST use \`-H "Authorization: Bearer $GH_TOKEN"\`
-- If the identity check fails, STOP immediately and report the error
+## HARD RULES — VIOLATION = TASK FAILURE
+1. **RUN THE ABOVE BLOCK FIRST** — before ANY \`gh\` or \`curl\` command to GitHub
+2. **If identity check fails → STOP IMMEDIATELY** — do not attempt workarounds
+3. **NEVER use \`gh\` without GH_TOKEN** — the default gh auth is the user's personal account
+4. **ALL GitHub API calls MUST include** \`-H "Authorization: Bearer $GH_TOKEN"\`
+5. **If you see "Not authenticated as bot"** → Report the error and END the task. Do NOT proceed.
 `;
 }
 

@@ -1,0 +1,20 @@
+[2026-04-08 02:38:13,745][isaaclab.app.app_launcher][WARNING] - The '--headless' CLI argument is deprecated. Omit '--viz' for default headless. If config visualizers are enabled and you want to force headless, use '--viz none'.
+[2026-04-08 02:38:13,746][isaaclab.app.app_launcher][INFO] - Using device: cuda:0
+[2026-04-08 02:38:13,746][isaaclab.app.app_launcher][INFO] - Loading experience file: /home/horde/IsaacLab/apps/isaaclab.python.headless.kit
+[2026-04-08 02:38:13,939][asyncio][DEBUG] - Using selector: EpollSelector
+[2026-04-08 02:38:14,035][omni.kit.registry.nucleus.registry_manager][INFO] - 'trusted' is not set for registry 'kit/default' in '/exts/omni.kit.registry.nucleus/registries'
+[2026-04-08 02:38:14,036][omni.kit.registry.nucleus.registry_manager][INFO] - 'trusted' is not set for registry 'kit/sdk' in '/exts/omni.kit.registry.nucleus/registries'
+[2026-04-08 02:38:14,036][omni.kit.registry.nucleus.registry_manager][INFO] - 'trusted' is not set for registry 'kit/prod/default' in '/exts/omni.kit.registry.nucleus/registries'
+[2026-04-08 02:38:14,036][omni.kit.registry.nucleus.registry_manager][INFO] - 'trusted' is not set for registry 'kit/prod/sdk' in '/exts/omni.kit.registry.nucleus/registries'
+[2026-04-08 02:38:25,313][packman.link][INFO] - Created symbolic link
+[2026-04-08 02:38:25,318][packman.link][INFO] - Created symbolic link
+[2026-04-08 02:38:25,322][packman.link][INFO] - Created symbolic link
+[2026-04-08 02:38:25,326][packman.link][INFO] - Created symbolic link
+[2026-04-08 02:38:25,330][packman.link][INFO] - Created symbolic link
+[2026-04-08 02:38:25,333][packman.link][INFO] - Created symbolic link
+[2026-04-08 02:38:25,337][packman.link][INFO] - Created symbolic link
+[2026-04-08 02:38:25,341][packman.link][INFO] - Created symbolic link
+[2026-04-08 02:38:25,345][packman.link][INFO] - Created symbolic link
+[2026-04-08 02:38:25,349][packman.link][INFO] - Created symbolic link
+[2026-04-08 02:38:25,353][packman.link][INFO] - Created symbolic link
+[2026-04-08 02:38:25,356][packman.link][INFO] - Created symbolic link

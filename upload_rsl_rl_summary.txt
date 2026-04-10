@@ -1,0 +1,51 @@
+RSL RL Checkpoint Upload Summary
+================================
+Date: Wed Apr 8 02:13 UTC 2026
+Target: kellyguo11/IsaacLab release training-checkpoints-develop
+
+TOTAL: 26 uploaded, 2 skipped (no checkpoints), 0 failed
+
+UPLOADED (26):
+  ✅ rsl_rl__Isaac-Dexsuite-Kuka-Allegro-Lift-v0__model_499.pt
+  ✅ rsl_rl__Isaac-Dexsuite-Kuka-Allegro-Reorient-v0__model_499.pt
+  ✅ rsl_rl__Isaac-Franka-Cabinet-Direct-v0__model_50.pt
+  ✅ rsl_rl__Isaac-Humanoid-Direct-v0__model_50.pt
+  ✅ rsl_rl__Isaac-Humanoid-v0__model_999.pt
+  ✅ rsl_rl__Isaac-Lift-Cube-Franka-v0__model_50.pt
+  ✅ rsl_rl__Isaac-Lift-Cube-OpenArm-v0__model_50.pt
+  ✅ rsl_rl__Isaac-Open-Drawer-Franka-v0__model_50.pt
+  ✅ rsl_rl__Isaac-Open-Drawer-OpenArm-v0__model_50.pt
+  ✅ rsl_rl__Isaac-Quadcopter-Direct-v0__model_50.pt
+  ✅ rsl_rl__Isaac-Reach-Franka-v0__model_999.pt
+  ✅ rsl_rl__Isaac-Reach-OpenArm-Bi-v0__model_999.pt
+  ✅ rsl_rl__Isaac-Reach-OpenArm-v0__model_999.pt
+  ✅ rsl_rl__Isaac-Reach-UR10-v0__model_999.pt
+  ✅ rsl_rl__Isaac-Repose-Cube-Allegro-Direct-v0__model_499.pt
+  ✅ rsl_rl__Isaac-Repose-Cube-Allegro-NoVelObs-v0__model_50.pt
+  ✅ rsl_rl__Isaac-Repose-Cube-Allegro-v0__model_50.pt
+  ✅ rsl_rl__Isaac-Velocity-Flat-Anymal-D-v0__model_999.pt
+  ✅ rsl_rl__Isaac-Velocity-Flat-Cassie-v0__model_999.pt
+  ✅ rsl_rl__Isaac-Velocity-Flat-Digit-v0__model_999.pt
+  ✅ rsl_rl__Isaac-Velocity-Flat-G1-v0__model_999.pt
+  ✅ rsl_rl__Isaac-Velocity-Flat-H1-v0__model_999.pt
+  ✅ rsl_rl__Isaac-Velocity-Flat-Spot-v0__model_999.pt
+  ✅ rsl_rl__Isaac-Velocity-Flat-Unitree-A1-v0__model_999.pt
+  ✅ rsl_rl__Isaac-Velocity-Flat-Unitree-Go1-v0__model_999.pt  (checkpoint dir was 2026-04-07, ran past midnight)
+  ✅ rsl_rl__Isaac-Velocity-Flat-Unitree-Go2-v0__model_999.pt  (checkpoint dir was 2026-04-07, ran past midnight)
+
+SKIPPED - No checkpoints found (2):
+  ⏭️  Isaac-Navigation-Flat-Anymal-C-v0 — marked success=true but ran only 61s, no model files saved anywhere
+  ⏭️  Isaac-Repose-Cube-Shadow-Direct-v0 — marked success=true but ran only 48s, no model files saved anywhere
+
+FAILED IN RESULTS JSON (not attempted, success=false):
+  ❌ Isaac-Repose-Cube-Shadow-OpenAI-FF-Direct-v0 (9.8s)
+  ❌ Isaac-TrackPositionNoObstacles-ARL-Robot-1-v0 (2.6s)
+  ❌ Isaac-Tracking-LocoManip-Digit-v0 (2.7s)
+  ❌ Isaac-Velocity-Flat-Anymal-B-v0 (2.6s)
+  ❌ Isaac-Velocity-Flat-Anymal-C-Direct-v0 (4.5s)
+  ❌ Isaac-Velocity-Flat-Anymal-C-v0 (3.9s)
+
+NOTES:
+- Isaac-Repose-Cube-Shadow-Direct-v0: No checkpoint exists in any directory. The rerun log shows it started Isaac Sim but the NotImplementedError for debug visualization suggests it may have hit an issue. No model_*.pt files were ever saved.
+- Isaac-Navigation-Flat-Anymal-C-v0: Similarly no checkpoint directory exists at all.
+- Both are marked success=true in the JSON but should probably be investigated — they ran too briefly to have completed training.

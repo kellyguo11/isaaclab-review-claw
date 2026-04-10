@@ -1,0 +1,5 @@
+[2026-04-06 18:07:33,880][isaaclab.app.app_launcher][WARNING] - The '--headless' CLI argument is deprecated. Omit '--viz' for default headless. If config visualizers are enabled and you want to force headless, use '--viz none'.
+[2026-04-06 18:07:33,881][isaaclab.app.app_launcher][INFO] - Using device: cuda:0
+[2026-04-06 18:07:33,882][isaaclab.app.app_launcher][INFO] - Loading experience file: /home/horde/IsaacLab/apps/isaaclab.python.headless.kit
+[2026-04-06 18:07:34,169][asyncio][DEBUG] - Using selector: EpollSelector
+[2026-04-06 18:07:36,677][__main__][WARNING] - IO descriptors are only supported for manager based RL environments. No IO descriptors will be exported.

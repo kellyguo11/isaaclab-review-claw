@@ -1,0 +1,106 @@
+# Kit Dependency Solver Failure Analysis
+# ======================================
+# Date: 2026-04-08
+# Affected: 6/35 RSL RL training tasks in the rerun campaign
+
+## Summary
+
+All 6 failing tasks failed with the SAME error:
+  "No versions of omni.physx that satisfies: isaaclab.python.headless-2.3.2 depends on omni.physx version *"
+
+The omni.physx extension was not found locally OR in remote Kit extension registries.
+
+## Failing Tasks (all started within 22 seconds of each other)
+1. Isaac-Repose-Cube-Shadow-OpenAI-FF-Direct-v0  (started 21:22:57, dur=9.8s)
+2. Isaac-TrackPositionNoObstacles-ARL-Robot-1-v0   (started 21:23:07, dur=2.6s)
+3. Isaac-Tracking-LocoManip-Digit-v0               (started 21:23:10, dur=2.7s)
+4. Isaac-Velocity-Flat-Anymal-B-v0                 (started 21:23:12, dur=2.6s)
+5. Isaac-Velocity-Flat-Anymal-C-Direct-v0          (started 21:23:15, dur=4.5s)
+6. Isaac-Velocity-Flat-Anymal-C-v0                 (started 21:23:19, dur=3.9s)
+
+## Root Cause: Kit App Identity Mismatch
+
+### The Smoking Gun
+Perfect correlation between Kit app data directory and success/failure:
+- ALL 29 successful tasks → data dir: Kit/IsaacLab/3.0
+- ALL 6 failing tasks → data dir: Kit/Isaac-Sim/5.1
+
+### How Kit Finds omni.physx
+The isaaclab.python.headless.kit experience file declares:
+  "omni.physx" = {}  (in [dependencies])
+
+omni.physx is NOT available locally in any extension search folder:
+  - ${exe-path}/exts, extscore (Kit kernel) — no physx
+  - ${exe-path}/../extsPhysics — directory DOES NOT EXIST
+  - ${exe-path}/../isaacsim/extsPhysics — directory DOES NOT EXIST
+  - IsaacSim build exts — only has isaacsim.sensors.physx*, not omni.physx
+
+So Kit falls back to remote extension registries:
+  1. kit/default → https://ovextensionsprod.blob.core.windows.net/exts/kit/prod/107/shared/
+  2. kit/sdk → https://ovextensionsprod.blob.core.windows.net/exts/kit/prod/sdk/110.0/
+  3. kit/community → https://dw290v42wisod.cloudfront.net/exts/kit/community/
+
+### Why Registries Failed for the 6 Tasks
+The kit/default registry (Kit 107) has omni.physx but ONLY for Python 3.11 (cp311).
+We run Python 3.12 (cp312), so Kit's target-platform filter rejects those packages.
+
+The kit/sdk registry (Kit 110) does NOT contain omni.physx at all.
+
+The kit/community registry does NOT contain omni.physx.
+
+### Why 29 Other Tasks Succeeded  
+The successful tasks loaded with app identity "IsaacLab" v3.0, which means Kit stored 
+their extension resolution state in the data/Kit/IsaacLab/3.0/ directory. These tasks 
+found omni.physx likely from a pre-existing global extension cache 
+(/home/horde/.local/share/ov/data/exts/v2/) that was populated during the ORIGINAL 
+training campaign or during Isaac Sim build/setup.
+
+The 6 failing tasks somehow loaded with app identity "Isaac-Sim" v5.1, which means Kit
+used a different data directory (data/Kit/Isaac-Sim/5.1/). This directory had no 
+pre-existing extension cache state, forcing a fresh registry sync that discovered ONLY
+Kit 107 packages (cp311-only — incompatible with our cp312 runtime).
+
+### Why Different App Identities?
+The isaaclab.python.headless.kit sets app.name = "IsaacLab" and app.version = "3.0.0".
+Under normal conditions all tasks should use these settings. The 6 failing tasks 
+getting "Isaac-Sim/5.1" instead suggests that Kit's app identification system 
+intermittently falls back to a default identity.
+
+This may be a race condition: the 6 tasks started in rapid succession (each failing in
+~2-10s due to dependency errors). The first failure (Shadow-OpenAI-FF) took 9.8s because
+it waited for a full registry sync. Subsequent failures were faster but still failed 
+because the registry sync completed with no cp312-compatible omni.physx packages.
+
+## The Fix: Add Proper omni.physx Extension Search Path
+
+### Option 1: Add global ext cache as search path (quick fix)
+Add to isaaclab.python.headless.kit under [settings.app.exts]:
+  folders.'++' = ["/home/horde/.local/share/ov/data/exts/v2"]
+
+This ensures the cached extensions (including omni.physx-110.0.7+110.0.0.lx64.r.cp312.u7f4)
+are always found locally without needing remote registry sync.
+
+### Option 2: Disable remote registries and ensure local availability (robust fix)
+1. Set registryEnabled = false in the .kit file
+2. Ensure omni.physx extensions exist in a local search path
+3. Add the Isaac physics registries that have Kit 110 + cp312 builds
+
+### Option 3: Simply re-run the 6 failed tasks (simplest fix)
+Since the global extension cache was populated on 2026-04-08 00:06:29 (during a later 
+successful run), re-running these 6 tasks now should succeed because omni.physx will 
+be found in the cached extensions.
+
+### Recommended: Option 3 (re-run) + Option 1 (prevent recurrence)
+
+## Verified Fix: Extensions Now Cached
+The omni.physx extensions are now cached at:
+  /home/horde/.local/share/ov/data/exts/v2/omni.physx-110.0.7+110.0.0.lx64.r.cp312.u7f4/
+  (birth: 2026-04-08 00:06:29)
+
+These were downloaded during a successful Kit launch post-failure. Re-running the 6 
+tasks should now succeed without any code changes.
+
+## Log Locations
+- Task logs: /home/horde/IsaacLab/training_campaign/logs_rsl_rl_rerun_20260406_181432/
+- Kit internal logs: /home/horde/.cache/packman/chk/kit-kernel/110.0.0+feature.manylinux_2_35_x86_64.release/logs/
+- Detailed Kit log for first failure: .../logs/Kit/Isaac-Sim/5.1/kit_20260406_212257.log

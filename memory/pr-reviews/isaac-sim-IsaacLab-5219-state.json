@@ -1,0 +1,20 @@
+{
+  "pr": "isaac-sim/IsaacLab#5219",
+  "title": "Exposes Newton collision pipeline configuration through NewtonCfg",
+  "author": "ooctipus",
+  "lastReviewedSha": "7bde3cb9379b7a0586fb29e1542626d81f35b75a",
+  "previousSha": "c9c1a29eaad465f35a724accadf7cbe33a88433a",
+  "lastReviewedAt": "2026-04-10T16:18:00Z",
+  "status": "changes_requested_by_human_reviewer",
+  "botReviewId": 4086552497,
+  "followUpPosted": false,
+  "notes": "Author addressed 2/3 bot review comments: (1) truthiness check fixed with is not None in new to_pipeline_args() method, (2) tolerance changelog entry added. AntoineRichard requested changes asking about Kamino-style config resolution pattern (PR #5214). No new code issues found in incremental update.",
+  "addressedComments": [
+    "hydro_cfg truthiness check → is not None",
+    "MJWarpSolverCfg.tolerance changelog entry added",
+    "Refactored config→pipeline conversion into to_pipeline_args() method"
+  ],
+  "openComments": [
+    "AntoineRichard: design question about Kamino-style config resolution outside manager"
+  ]
+}
