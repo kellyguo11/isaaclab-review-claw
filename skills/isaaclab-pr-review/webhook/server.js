@@ -214,6 +214,7 @@ function triggerAgent(task, label) {
   fs.writeFileSync(taskFile, JSON.stringify({
     task,
     label,
+    model: "nvidia/aws/anthropic/claude-opus-4-5",  // Use Opus 4.5 for best code review quality
     created: new Date().toISOString(),
   }, null, 2));
   console.log(`[agent] Wrote pending task: ${taskFile}`);
