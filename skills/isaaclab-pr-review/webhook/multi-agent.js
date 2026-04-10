@@ -188,6 +188,31 @@ For inline comments, use this structure:
 gh pr diff ${prNum} --repo ${REPO} | grep -n "^+" | head -50  # Shows added lines with positions
 \`\`\`
 
+## How to Build the Comments Array
+
+For EACH finding that references a specific line in a changed file:
+
+1. **Parse the finding**: Extract file path and line number from "file.py:42" format
+2. **Check if line is in diff**: The line must be an ADDED or MODIFIED line (appears with "+" prefix in diff)
+3. **Get the line number in the new file**: Look at the hunk header \`@@ -old,len +new,len @@\` — use the NEW side line number
+4. **Build the comment object**:
+   \`\`\`json
+   {"path": "source/file.py", "line": 42, "side": "RIGHT", "body": "🔴 **Critical:** The issue..."}
+   \`\`\`
+
+**Example workflow:**
+\`\`\`bash
+# 1. Find what lines are added/modified in a specific file
+gh pr diff ${prNum} --repo ${REPO} | grep -A5 "^+++ b/source/isaaclab/file.py" | head -20
+
+# 2. Look for the line number in hunk headers like @@ -10,5 +10,8 @@
+#    The +10 means new file starts at line 10 in this hunk
+
+# 3. Count lines from there to find your target line's position
+\`\`\`
+
+**If a finding's line is NOT in the diff** (e.g., it's about existing code context), include it in the review body text instead of the comments array.
+
 ## Step 5: Update State
 
 \`\`\`bash
