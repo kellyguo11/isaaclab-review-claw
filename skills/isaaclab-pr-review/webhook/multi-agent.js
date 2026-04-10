@@ -1,5 +1,5 @@
-// Multi-Agent Review Task Builders
-// These create tasks for the 3 specialized review agents + aggregator
+// Multi-Agent Ensemble Review Task Builders
+// Runs two parallel review pipelines with different models, then merges results
 
 const fs = require("fs");
 const path = require("path");
@@ -7,6 +7,12 @@ const path = require("path");
 const AGENTS_DIR = path.join(__dirname, "..", "agents");
 const STATE_PATH = path.join(__dirname, "..", "state.json");
 const REPO = "isaac-sim/IsaacLab";
+
+// Model configuration for ensemble
+const ENSEMBLE_MODELS = {
+  primary: "nvidia/aws/anthropic/claude-opus-4-5",    // NVIDIA NIM - thorough analysis
+  secondary: "nvidia/aws/anthropic/bedrock-claude-opus-4-6"  // Bedrock - different perspective
+};
 
 // Import identity check from server
 function identityCheckBlock(token) {
@@ -73,11 +79,18 @@ function buildMultiAgentReviewTask(pr, token) {
     return null; // Caller should fall back to buildReviewTask
   }
 
-  return `You are the Isaac Lab Review Bot coordinator. Your job is to orchestrate a multi-perspective code review of PR #${prNum}.
+  return `You are the Isaac Lab Review Bot coordinator. Your job is to orchestrate an **ENSEMBLE** multi-model code review of PR #${prNum}.
 
-## Architecture
+## Architecture: Ensemble Multi-Model Review
 
-You will spawn 3 specialized sub-agents in PARALLEL, wait for all results, then synthesize them into one cohesive review.
+You will run **TWO parallel review pipelines** using different models, then merge all findings:
+
+**Pipeline A (Opus 4.5 - NVIDIA NIM):** Known for thorough, detailed analysis
+**Pipeline B (Opus 4.6 - Bedrock):** Different perspective, catches different issues
+
+Each pipeline spawns 3 specialized agents → 6 total agents → merged into one cohesive review.
+
+This ensemble approach catches more issues because different models have different blind spots.
 
 ${identityCheckBlock(token)}
 
@@ -104,24 +117,42 @@ gh pr checks ${prNum} --repo ${REPO}
 
 Save this context — you'll include relevant parts in each sub-agent task.
 
-## Step 2: Spawn 3 Review Agents in Parallel
+## Step 2: Spawn 6 Review Agents (2 Pipelines × 3 Agents)
 
-Use \`sessions_spawn\` to create 3 sub-agents. Each gets:
-1. The PR context (diff, files, description)
-2. Their specialized prompt
-3. The GH_TOKEN for API calls
+Use \`sessions_spawn\` to create agents. **CRITICAL: Specify the model for each agent.**
 
-**Agent 1: Isaac Lab Expert** (architecture, design, implementation)
+### Pipeline A: Opus 4.5 (NVIDIA NIM)
+Use \`model: "${ENSEMBLE_MODELS.primary}"\` for these 3 agents:
+
+**Agent A1: Isaac Lab Expert (4.5)**
 \`\`\`
 ${isaacLabExpert}
 \`\`\`
 
-**Agent 2: Silent Failure Hunter** (error handling, edge cases)
+**Agent A2: Silent Failure Hunter (4.5)**
 \`\`\`
 ${silentFailureHunter}
 \`\`\`
 
-**Agent 3: Test Coverage Analyzer** (test quality, coverage gaps)
+**Agent A3: Test Coverage Analyzer (4.5)**
+\`\`\`
+${testAnalyzer}
+\`\`\`
+
+### Pipeline B: Opus 4.6 (Bedrock)
+Use \`model: "${ENSEMBLE_MODELS.secondary}"\` for these 3 agents:
+
+**Agent B1: Isaac Lab Expert (4.6)**
+\`\`\`
+${isaacLabExpert}
+\`\`\`
+
+**Agent B2: Silent Failure Hunter (4.6)**
+\`\`\`
+${silentFailureHunter}
+\`\`\`
+
+**Agent B3: Test Coverage Analyzer (4.6)**
 \`\`\`
 ${testAnalyzer}
 \`\`\`
@@ -146,15 +177,32 @@ export GH_TOKEN="${token}"
 4. Be thorough but precise — quality over quantity
 \`\`\`
 
-Spawn all 3 with \`sessions_spawn\` and use \`sessions_yield\` to wait for results.
+**Spawn all 6 agents in parallel** with \`sessions_spawn\`, specifying the model:
+- Agents A1, A2, A3: \`model: "${ENSEMBLE_MODELS.primary}"\`
+- Agents B1, B2, B3: \`model: "${ENSEMBLE_MODELS.secondary}"\`
 
-## Step 3: Aggregate Results
+Use \`sessions_yield\` to wait for all results.
 
-Once all 3 agents return, synthesize their outputs using this aggregation guide:
+## Step 3: Aggregate & Deduplicate Results
+
+Once all 6 agents return, merge their outputs using this aggregation guide:
 
 \`\`\`
 ${aggregator}
 \`\`\`
+
+### Ensemble-Specific Aggregation Rules:
+
+1. **High-confidence findings** (found by both models): Mark with 🔴 or ⚠️ — these are very likely real issues
+2. **Single-model findings** (found by only one model): Still include, but verify carefully before marking Critical
+3. **Deduplicate aggressively**: Same issue found by multiple agents → merge into one finding
+4. **Note model agreement**: In findings, you can mention "Both Opus 4.5 and 4.6 flagged this" for high-confidence issues
+5. **Don't double-count**: 6 agents finding the same bug = 1 finding, not 6
+
+### Severity Calibration:
+- 🔴 **Critical**: Confirmed by both models OR clear correctness bug
+- ⚠️ **Warning**: High confidence from one model, or both models agree it's notable
+- 💡 **Suggestion**: Nice-to-have improvements, single model only
 
 ## Step 4: Post the Review
 
@@ -196,31 +244,6 @@ For inline comments, use this structure:
 gh pr diff ${prNum} --repo ${REPO} | grep -n "^+" | head -50  # Shows added lines with positions
 \`\`\`
 
-## How to Build the Comments Array
-
-For EACH finding that references a specific line in a changed file:
-
-1. **Parse the finding**: Extract file path and line number from "file.py:42" format
-2. **Check if line is in diff**: The line must be an ADDED or MODIFIED line (appears with "+" prefix in diff)
-3. **Get the line number in the new file**: Look at the hunk header \`@@ -old,len +new,len @@\` — use the NEW side line number
-4. **Build the comment object**:
-   \`\`\`json
-   {"path": "source/file.py", "line": 42, "side": "RIGHT", "body": "🔴 **Critical:** The issue..."}
-   \`\`\`
-
-**Example workflow:**
-\`\`\`bash
-# 1. Find what lines are added/modified in a specific file
-gh pr diff ${prNum} --repo ${REPO} | grep -A5 "^+++ b/source/isaaclab/file.py" | head -20
-
-# 2. Look for the line number in hunk headers like @@ -10,5 +10,8 @@
-#    The +10 means new file starts at line 10 in this hunk
-
-# 3. Count lines from there to find your target line's position
-\`\`\`
-
-**If a finding's line is NOT in the diff** (e.g., it's about existing code context), include it in the review body text instead of the comments array.
-
 ## Step 5: Update State
 
 \`\`\`bash
@@ -232,7 +255,7 @@ s.reviewed_prs['${prNum}'] = {
   last_reviewed_sha: '${headSha}',
   reviewed_at: new Date().toISOString(),
   status: 'reviewed',
-  review_type: 'multi-agent'
+  review_type: 'ensemble-multi-model'
 };
 delete (s.pending_reviews || {})['${prNum}'];
 fs.writeFileSync('${stateFilePath}', JSON.stringify(s, null, 2) + '\\n');
@@ -242,14 +265,15 @@ console.log('State updated for PR #${prNum}');
 
 ## Important Notes
 
-1. **Spawn agents in parallel** — don't wait for one before starting another
-2. **Deduplicate findings** — if multiple agents flag the same issue, merge them
-3. **Calibrate severity** — ensure Critical/Warning/Suggestion are applied consistently
-4. **Quality over quantity** — aim for 3-8 findings total, not exhaustive lists
-5. **Verify before posting** — every finding must be correct and actionable
+1. **Spawn ALL 6 agents in parallel** — don't wait for one before starting another
+2. **Specify model explicitly** for each agent (3x Opus 4.5, 3x Opus 4.6)
+3. **Deduplicate findings** — same issue from multiple agents = one finding
+4. **Note model agreement** — higher confidence when both models concur
+5. **Quality over quantity** — aim for 5-10 high-quality findings, not exhaustive lists
+6. **Verify before posting** — every finding must be correct and actionable
 
-Report: PR number, number of findings from each agent, final aggregated findings count, overall verdict.`;
+Report: PR number, findings per agent (A1-A3, B1-B3), overlap stats, final aggregated count, verdict.`;
 }
 
 // Export for use in server
-module.exports = { buildMultiAgentReviewTask, loadAgentPrompt };
+module.exports = { buildMultiAgentReviewTask, loadAgentPrompt, ENSEMBLE_MODELS };
