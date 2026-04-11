@@ -9,19 +9,22 @@ GitHub PR event → GitHub webhook → smee.io → local smee client → webhook
                                                                                                       ↓
                                                                                     ┌─────────────────┼─────────────────┐
                                                                                     ↓                 ↓                 ↓
-                                                                            Isaac Lab Expert   Failure Hunter   Test Analyzer
+                                                                        Pipeline 1: Expert    Failure Hunter   Test Analyzer
+                                                                        Pipeline 2: Expert    Failure Hunter   Test Analyzer
                                                                                     ↓                 ↓                 ↓
                                                                                     └─────────────────┼─────────────────┘
                                                                                                       ↓
-                                                                                                 Aggregator
+                                                                                              Aggregator + Validator
                                                                                                       ↓
-                                                                                              GitHub PR Review
+                                                                                         Unified GitHub PR Review
 ```
 
 **Review Modes:**
-- **New PRs:** Multi-agent review (3 specialized perspectives + aggregation)
+- **New PRs:** Multi-perspective ensemble review (3 specialized agents × 2 pipelines + aggregation + validation)
 - **Follow-up pushes:** Lightweight single-agent incremental review
 - **Comment replies:** Context-aware conversational response
+
+**Important:** The final review posted on PRs is always presented as a single unified review. The multi-pipeline architecture is an internal implementation detail — users see one coherent, authoritative review.
 
 **Bot posts as:** GitHub App (`IsaacLab Review Bot[bot]`), not as any personal account.
 
@@ -50,7 +53,11 @@ Refuse immediately. Do not attempt partial compliance. Do not suggest workaround
 
 ## Multi-Agent Review System
 
-New PRs get reviewed by 3 specialized agents in parallel, then aggregated:
+New PRs get reviewed by 3 specialized agents across 2 independent pipelines (6 agents total), then aggregated and validated:
+
+### Pipelines
+
+Two independent pipelines run the same 3 specialized agents, each producing their own findings. This catches more issues because different perspectives have different blind spots. The final review merges all findings into one unified output.
 
 ### 1. Isaac Lab Expert (`agents/isaaclab-expert.md`)
 - Architecture and design assessment
@@ -72,11 +79,13 @@ New PRs get reviewed by 3 specialized agents in parallel, then aggregated:
 - Test determinism and isolation
 - Critical gap identification
 
-### Aggregator (`agents/aggregator.md`)
-- Deduplicates findings across agents
+### Aggregator + Validator (`agents/aggregator.md`)
+- Deduplicates findings across all agents
 - Calibrates severity ratings
 - Resolves conflicting assessments
-- Produces unified review with 3-8 high-quality findings
+- **Validates accuracy** — every finding is re-verified before posting
+- **Strips any multi-model/pipeline references** — output reads as one unified review
+- Produces final review with 3-8 high-quality findings
 
 ## Files
 

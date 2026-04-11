@@ -1,5 +1,7 @@
 // Multi-Agent Ensemble Review Task Builders
 // Runs two parallel review pipelines with different models, then merges results
+// into a single unified review. The final output must not reveal that multiple
+// models were used — users see one coherent review.
 
 const fs = require("fs");
 const path = require("path");
@@ -9,9 +11,10 @@ const STATE_PATH = path.join(__dirname, "..", "state.json");
 const REPO = "isaac-sim/IsaacLab";
 
 // Model configuration for ensemble
+// Two models provide independent perspectives; final output is unified.
 const ENSEMBLE_MODELS = {
-  primary: "nvidia/aws/anthropic/claude-opus-4-5",    // NVIDIA NIM - thorough analysis
-  secondary: "nvidia/aws/anthropic/bedrock-claude-opus-4-6"  // Bedrock - different perspective
+  primary: "nvidia/aws/anthropic/claude-opus-4-5",
+  secondary: "nvidia/aws/anthropic/bedrock-claude-opus-4-6"
 };
 
 // Import identity check from server
@@ -79,18 +82,15 @@ function buildMultiAgentReviewTask(pr, token) {
     return null; // Caller should fall back to buildReviewTask
   }
 
-  return `You are the Isaac Lab Review Bot coordinator. Your job is to orchestrate an **ENSEMBLE** multi-model code review of PR #${prNum}.
+  return `You are the Isaac Lab Review Bot coordinator. Your job is to orchestrate a multi-perspective code review of PR #${prNum}.
 
-## Architecture: Ensemble Multi-Model Review
+## Architecture: Multi-Perspective Review
 
-You will run **TWO parallel review pipelines** using different models, then merge all findings:
-
-**Pipeline A (Opus 4.5 - NVIDIA NIM):** Known for thorough, detailed analysis
-**Pipeline B (Opus 4.6 - Bedrock):** Different perspective, catches different issues
+You will run **TWO parallel review pipelines**, then merge all findings into a **single unified review**.
 
 Each pipeline spawns 3 specialized agents → 6 total agents → merged into one cohesive review.
 
-This ensemble approach catches more issues because different models have different blind spots.
+**CRITICAL RULE: The final review posted on the PR must NOT mention, hint at, or reveal that multiple models or pipelines were used.** The users must see a single authoritative review as if written by one reviewer. No references to "Pipeline A", "Pipeline B", model names, ensemble, or multi-model anywhere in the posted review.
 
 ${identityCheckBlock(token)}
 
@@ -121,38 +121,38 @@ Save this context — you'll include relevant parts in each sub-agent task.
 
 Use \`sessions_spawn\` to create agents. **CRITICAL: Specify the model for each agent.**
 
-### Pipeline A: Opus 4.5 (NVIDIA NIM)
+### Pipeline 1
 Use \`model: "${ENSEMBLE_MODELS.primary}"\` for these 3 agents:
 
-**Agent A1: Isaac Lab Expert (4.5)**
+**Agent 1A: Isaac Lab Expert**
 \`\`\`
 ${isaacLabExpert}
 \`\`\`
 
-**Agent A2: Silent Failure Hunter (4.5)**
+**Agent 1B: Silent Failure Hunter**
 \`\`\`
 ${silentFailureHunter}
 \`\`\`
 
-**Agent A3: Test Coverage Analyzer (4.5)**
+**Agent 1C: Test Coverage Analyzer**
 \`\`\`
 ${testAnalyzer}
 \`\`\`
 
-### Pipeline B: Opus 4.6 (Bedrock)
+### Pipeline 2
 Use \`model: "${ENSEMBLE_MODELS.secondary}"\` for these 3 agents:
 
-**Agent B1: Isaac Lab Expert (4.6)**
+**Agent 2A: Isaac Lab Expert**
 \`\`\`
 ${isaacLabExpert}
 \`\`\`
 
-**Agent B2: Silent Failure Hunter (4.6)**
+**Agent 2B: Silent Failure Hunter**
 \`\`\`
 ${silentFailureHunter}
 \`\`\`
 
-**Agent B3: Test Coverage Analyzer (4.6)**
+**Agent 2C: Test Coverage Analyzer**
 \`\`\`
 ${testAnalyzer}
 \`\`\`
@@ -184,8 +184,8 @@ Do NOT run \`openclaw sessions spawn\` in bash — that will fail.
 Use the sessions_spawn tool directly with parameters: task, model, label.
 
 Model assignments:
-- Agents A1, A2, A3: \`model: "${ENSEMBLE_MODELS.primary}"\`
-- Agents B1, B2, B3: \`model: "${ENSEMBLE_MODELS.secondary}"\`
+- Agents 1A, 1B, 1C: \`model: "${ENSEMBLE_MODELS.primary}"\`
+- Agents 2A, 2B, 2C: \`model: "${ENSEMBLE_MODELS.secondary}"\`
 
 After spawning all 6, use \`sessions_yield\` to wait for results.
 
@@ -197,22 +197,65 @@ Once all 6 agents return, merge their outputs using this aggregation guide:
 ${aggregator}
 \`\`\`
 
-### Ensemble-Specific Aggregation Rules:
+### Aggregation Rules:
 
-1. **High-confidence findings** (found by both models): Mark with 🔴 or ⚠️ — these are very likely real issues
-2. **Single-model findings** (found by only one model): Still include, but verify carefully before marking Critical
+1. **High-confidence findings** (found by both pipelines): These are very likely real issues — prioritize them
+2. **Single-pipeline findings**: Still include if valid, but verify carefully before marking Critical
 3. **Deduplicate aggressively**: Same issue found by multiple agents → merge into one finding
-4. **Note model agreement**: In findings, you can mention "Both Opus 4.5 and 4.6 flagged this" for high-confidence issues
+4. **DO NOT mention pipelines, models, or ensemble in the output**: The review must read as one unified analysis. Never say "multiple reviewers found", "both analyses flagged", or anything that implies more than one review pass.
 5. **Don't double-count**: 6 agents finding the same bug = 1 finding, not 6
 
 ### Severity Calibration:
-- 🔴 **Critical**: Confirmed by both models OR clear correctness bug
-- ⚠️ **Warning**: High confidence from one model, or both models agree it's notable
-- 💡 **Suggestion**: Nice-to-have improvements, single model only
+- 🔴 **Critical**: Confirmed by multiple agents OR clear correctness bug
+- ⚠️ **Warning**: High confidence finding, notable impact
+- 💡 **Suggestion**: Nice-to-have improvements
 
-## Step 4: Post the Review
+## Step 4: Validate the Aggregated Review
 
-Build a JSON payload with the aggregated review and post it:
+Before posting, run a thorough validation pass on the aggregated review:
+
+### Validation Checklist:
+1. **No model/pipeline leaks**: Scan the entire review text. It must NOT contain:
+   - Any model names ("Opus", "Claude", "Bedrock", "4.5", "4.6")
+   - References to pipelines ("Pipeline A/B", "both analyses", "multiple reviewers")
+   - References to ensemble/multi-model approach
+   - Any phrasing that implies more than one review pass occurred
+   If found, rewrite those sections to read as a single unified review.
+
+2. **Finding accuracy**: For every finding:
+   - Re-read the relevant code to confirm the issue is real
+   - Verify file paths and line numbers exist in the diff
+   - Ensure the fix suggestion is correct and complete
+   - Remove any finding you cannot independently verify from the code
+
+3. **Actionability check**: Every finding must:
+   - State exactly what is wrong with evidence
+   - Explain WHY it matters (impact)
+   - Provide a concrete fix (code suggestion preferred)
+   - Remove vague findings ("might", "could", "consider")
+
+4. **Severity calibration**: Review all severity ratings:
+   - 🔴 Critical should be reserved for real bugs, data corruption, or correctness issues
+   - 🟡 Warning for design concerns, missing error handling with realistic failure modes
+   - 🔵 Suggestion for quality improvements
+   - Downgrade any over-inflated severities
+
+5. **Coherence check**: Read the full review as if you wrote it all yourself:
+   - Does the summary match the findings?
+   - Is the verdict consistent with the severity of findings?
+   - Are there contradictions between different findings?
+   - Does it flow naturally as a single cohesive review?
+
+6. **Signal-to-noise**: Aim for 3-8 high-quality findings:
+   - If you have >10 findings, cut the weakest ones
+   - Every finding must be worth the author's time to investigate
+   - Remove duplicates and near-duplicates
+
+Only proceed to posting after ALL validation checks pass.
+
+## Step 5: Post the Review
+
+Build a JSON payload with the validated review and post it:
 
 \`\`\`bash
 curl -s -X POST \\
@@ -250,7 +293,7 @@ For inline comments, use this structure:
 gh pr diff ${prNum} --repo ${REPO} | grep -n "^+" | head -50  # Shows added lines with positions
 \`\`\`
 
-## Step 5: Update State
+## Step 6: Update State
 
 \`\`\`bash
 node -e "
@@ -272,13 +315,14 @@ console.log('State updated for PR #${prNum}');
 ## Important Notes
 
 1. **Spawn ALL 6 agents in parallel** — don't wait for one before starting another
-2. **Specify model explicitly** for each agent (3x Opus 4.5, 3x Opus 4.6)
+2. **Specify model explicitly** for each agent (3 per pipeline)
 3. **Deduplicate findings** — same issue from multiple agents = one finding
-4. **Note model agreement** — higher confidence when both models concur
+4. **NEVER reveal the multi-model/ensemble approach** — the posted review must read as one unified review
 5. **Quality over quantity** — aim for 5-10 high-quality findings, not exhaustive lists
-6. **Verify before posting** — every finding must be correct and actionable
+6. **Validate thoroughly before posting** — every finding must be correct, actionable, and verified
+7. **Run the full validation checklist** (Step 4) before posting — no shortcuts
 
-Report: PR number, findings per agent (A1-A3, B1-B3), overlap stats, final aggregated count, verdict.`;
+Internal report (NOT posted to GitHub): PR number, findings per agent, overlap stats, final aggregated count, verdict.`;
 }
 
 // Export for use in server
