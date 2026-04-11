@@ -177,11 +177,17 @@ export GH_TOKEN="${token}"
 4. Be thorough but precise — quality over quantity
 \`\`\`
 
-**Spawn all 6 agents in parallel** with \`sessions_spawn\`, specifying the model:
+**Spawn all 6 agents in parallel using the \`sessions_spawn\` TOOL:**
+
+⚠️ CRITICAL: \`sessions_spawn\` is an API tool call, NOT a shell command!
+Do NOT run \`openclaw sessions spawn\` in bash — that will fail.
+Use the sessions_spawn tool directly with parameters: task, model, label.
+
+Model assignments:
 - Agents A1, A2, A3: \`model: "${ENSEMBLE_MODELS.primary}"\`
 - Agents B1, B2, B3: \`model: "${ENSEMBLE_MODELS.secondary}"\`
 
-Use \`sessions_yield\` to wait for all results.
+After spawning all 6, use \`sessions_yield\` to wait for results.
 
 ## Step 3: Aggregate & Deduplicate Results
 
