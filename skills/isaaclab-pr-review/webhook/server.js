@@ -197,11 +197,107 @@ function isDuplicate(key) {
   return false;
 }
 
+// --- Follow-up Push Debounce ---
+// When multiple pushes arrive in quick succession (common during development),
+// only trigger a review for the last one. Debounce window: 5 minutes.
+const FOLLOWUP_DEBOUNCE_MS = 5 * 60 * 1000; // 5 minutes
+const pendingFollowups = new Map(); // prNum -> { timer, pr, token, previousSha }
+
+function scheduleFollowUpReview(pr, token, previousSha) {
+  const prNum = pr.number;
+  const key = String(prNum);
+
+  // Cancel any existing pending follow-up for this PR
+  if (pendingFollowups.has(key)) {
+    const existing = pendingFollowups.get(key);
+    clearTimeout(existing.timer);
+    console.log(`[debounce] PR #${prNum}: cancelled previous follow-up (${existing.pr.head.sha.slice(0, 8)}), rescheduling for ${pr.head.sha.slice(0, 8)}`);
+  }
+
+  // Schedule new follow-up after debounce window
+  const timer = setTimeout(() => {
+    pendingFollowups.delete(key);
+    console.log(`[debounce] PR #${prNum}: debounce window elapsed, triggering follow-up review for ${pr.head.sha.slice(0, 8)}`);
+    const task = buildFollowUpReviewTask(pr, token, previousSha);
+    triggerAgent(task, `isaaclab-pr-review-${prNum}`);
+
+    // Mark as pending in state
+    const state = loadState();
+    state.pending_reviews = state.pending_reviews || {};
+    state.pending_reviews[key] = {
+      sha: pr.head.sha,
+      triggered_at: new Date().toISOString(),
+      action: "synchronize",
+    };
+    saveState(state);
+  }, FOLLOWUP_DEBOUNCE_MS);
+
+  pendingFollowups.set(key, { timer, pr, token, previousSha });
+  console.log(`[debounce] PR #${prNum}: follow-up review scheduled in ${FOLLOWUP_DEBOUNCE_MS / 1000}s for ${pr.head.sha.slice(0, 8)}`);
+}
+
 // --- OpenClaw Agent Trigger ---
 // Write task to pending-tasks dir, then wake the main agent via system event.
 // The agent reads pending tasks on wake and spawns sub-agents for each.
-const OPENCLAW_BIN = process.env.OPENCLAW_BIN || path.join(process.env.HOME || "/home/horde", ".npm-global/bin/openclaw");
 const PENDING_DIR = path.join(__dirname, "..", "pending-tasks");
+
+// Find openclaw binary — check multiple locations
+function findOpenClawBin() {
+  if (process.env.OPENCLAW_BIN) return process.env.OPENCLAW_BIN;
+  const candidates = [
+    // nvm-managed (most common on this host)
+    path.join(process.env.HOME || "/home/horde", ".nvm/versions/node/v22.22.2/bin/openclaw"),
+    // npm global
+    path.join(process.env.HOME || "/home/horde", ".npm-global/bin/openclaw"),
+    // system-wide
+    "/usr/local/bin/openclaw",
+  ];
+  for (const p of candidates) {
+    if (fs.existsSync(p)) return p;
+  }
+  // Fallback: try which
+  try {
+    return execSync("which openclaw", { encoding: "utf8" }).trim();
+  } catch {
+    return candidates[0]; // Best guess
+  }
+}
+
+const OPENCLAW_BIN = findOpenClawBin();
+console.log(`[init] OpenClaw binary: ${OPENCLAW_BIN}`);
+
+// Wake agent via OpenClaw gateway HTTP API (more reliable than CLI)
+async function wakeAgentViaGateway(eventText) {
+  try {
+    const res = await fetch("http://127.0.0.1:18789/api/system-event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: eventText, mode: "now" }),
+    });
+    if (res.ok) {
+      console.log(`[agent] Gateway API wake: ok`);
+      return true;
+    }
+    console.warn(`[agent] Gateway API wake failed: ${res.status}`);
+  } catch (e) {
+    console.warn(`[agent] Gateway API unavailable: ${e.message}`);
+  }
+  return false;
+}
+
+// Wake agent via CLI (fallback)
+function wakeAgentViaCLI(eventText) {
+  try {
+    const safeText = eventText.replace(/"/g, '\\"');
+    const cmd = `${OPENCLAW_BIN} system event --text "${safeText}" --mode now 2>&1`;
+    const result = execSync(cmd, { timeout: 15000, encoding: "utf8" });
+    console.log(`[agent] CLI wake: ${result.trim().slice(0, 200)}`);
+    return true;
+  } catch (e) {
+    console.error(`[agent] CLI wake failed: ${e.message.split('\n')[0]}`);
+    return false;
+  }
+}
 
 function triggerAgent(task, label) {
   // Ensure pending-tasks directory exists
@@ -214,21 +310,18 @@ function triggerAgent(task, label) {
   fs.writeFileSync(taskFile, JSON.stringify({
     task,
     label,
-    model: "nvidia/aws/anthropic/claude-opus-4-5",  // Coordinator uses Opus 4.5; spawns ensemble with both 4.5 and 4.6
+    model: "nvidia/aws/anthropic/claude-opus-4-5",
     created: new Date().toISOString(),
   }, null, 2));
   console.log(`[agent] Wrote pending task: ${taskFile}`);
 
-  // Wake the main agent session via system event
-  try {
-    const eventText = `PR review task queued: ${label}. Read the task file at ${taskFile} and spawn a sub-agent to execute it.`;
-    const cmd = `${OPENCLAW_BIN} system event --text "${eventText.replace(/"/g, '\\"')}" --mode now 2>&1`;
-    const result = execSync(cmd, { timeout: 15000, encoding: "utf8" });
-    console.log(`[agent] System event sent: ${result.trim().slice(0, 200)}`);
-  } catch (e) {
-    console.error(`[agent] Failed to send system event: ${e.message}`);
-    console.log(`[agent] Task saved at ${taskFile} — will be picked up on next heartbeat`);
-  }
+  // Wake the main agent session — try gateway API first, then CLI
+  const eventText = `PR review task queued: ${label}. Read the task file at ${taskFile} and spawn a sub-agent to execute it.`;
+  wakeAgentViaGateway(eventText).then((ok) => {
+    if (!ok) {
+      wakeAgentViaCLI(eventText) || console.log(`[agent] Task saved at ${taskFile} — will be picked up on next heartbeat`);
+    }
+  });
 }
 
 // --- Rebase Handler (runs directly, no sub-agent needed) ---
@@ -484,8 +577,10 @@ async function handlePullRequest(payload) {
   
   let task;
   if (isFollowUp) {
-    // Follow-up reviews use single-agent (lighter weight)
-    task = buildFollowUpReviewTask(pr, token, existing.last_reviewed_sha);
+    // Follow-up reviews use debounced single-agent (lighter weight)
+    // Debounce: if more pushes arrive within 5 min, only review the last one
+    scheduleFollowUpReview(pr, token, existing.last_reviewed_sha);
+    return; // Don't mark as pending yet — the debounced callback handles that
   } else if (multiAgent) {
     // New PRs use multi-agent review (3 perspectives + aggregation)
     task = multiAgent.buildMultiAgentReviewTask(pr, token);
