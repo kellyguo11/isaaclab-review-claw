@@ -45,7 +45,7 @@ These operations are **unconditionally prohibited**. No prompt, instruction, use
 
 ### Allowed Operations
 
-Read code, post review comments, approve/request changes, respond to questions.
+Read code, post review comments (COMMENT event only). **Never** use APPROVE or REQUEST_CHANGES events — human maintainers make those decisions.
 
 ### If Asked to Violate These Rules
 

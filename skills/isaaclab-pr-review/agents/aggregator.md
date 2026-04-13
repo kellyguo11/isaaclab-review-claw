@@ -99,12 +99,17 @@ One of: **Design is sound** | **Acceptable, but {X} would be better** | **Needs 
 
 ### Verdict
 
-**{APPROVE | REQUEST_CHANGES | COMMENT}**
+### Verdict
+
+**{Ship it | Minor fixes needed | Significant concerns | Needs rework}**
 
 {Clear recommendation:
-- APPROVE: No blocking issues, ship it
-- REQUEST_CHANGES: Critical/important issues must be fixed first
-- COMMENT: Feedback only, author decides}
+- Ship it: No blocking issues, clean implementation
+- Minor fixes needed: Correct approach, but has issues worth addressing
+- Significant concerns: Problems that could cause real issues
+- Needs rework: Fundamental approach has problems}
+
+NOTE: The verdict is advisory text only. The bot NEVER posts APPROVE or REQUEST_CHANGES on GitHub — only COMMENT. Human maintainers decide whether to approve or request changes.
 ```
 
 **Note:** The footer must NOT include attribution lines like "[Expert Analysis] + [Error Handling Audit] + [Test Coverage Check]". The review ends at the verdict.
@@ -122,10 +127,10 @@ One of: **Design is sound** | **Acceptable, but {X} would be better** | **Needs 
 - 🔵 **Suggestion:** Code quality, style (beyond linter), documentation, nice-to-haves
 
 ### Verdict Logic
-- Any 🔴 Critical → REQUEST_CHANGES
-- Multiple 🟡 Warnings without mitigation → REQUEST_CHANGES  
-- Only 🟡/🔵 with clear fixes → COMMENT (let author decide)
-- Clean review → APPROVE (rare, but acknowledge good work)
+- Any 🔴 Critical → **Significant concerns** or **Needs rework**
+- Multiple 🟡 Warnings without mitigation → **Minor fixes needed** or **Significant concerns**
+- Only 🟡/🔵 with clear fixes → **Minor fixes needed** (let author decide)
+- Clean review → **Ship it** (acknowledge good work)
 
 ### Quality Control
 - Don't include findings you can't verify from the diff/files
