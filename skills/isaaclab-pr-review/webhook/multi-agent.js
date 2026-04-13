@@ -27,21 +27,31 @@ function identityCheckBlock(token) {
 # Step 1: Set the bot token
 export GH_TOKEN="${token}"
 
-# Step 2: Verify identity — MUST be the bot app
-IDENTITY=$(curl -s -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/user | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('login','UNKNOWN'))" 2>/dev/null || echo "UNKNOWN")
-echo "Authenticated as: $IDENTITY"
+# Step 2: Verify the token works — check rate limit header for app identity
+# GitHub App installation tokens return 403 on /user but work on /rate_limit
+RATE_INFO=$(curl -si -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/rate_limit 2>/dev/null)
+RATE_STATUS=$(echo "$RATE_INFO" | head -1 | grep -o '[0-9]\\{3\\}')
 
-# Step 3: ABORT if not bot — this is a hard stop, no exceptions
-if [[ "$IDENTITY" != *"[bot]"* ]]; then
+if [[ "$RATE_STATUS" == "200" ]]; then
+  # Check if this is a personal token by trying /user
+  USER_LOGIN=$(curl -s -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/user 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('login',''))" 2>/dev/null || echo "")
+  if [[ -n "$USER_LOGIN" && "$USER_LOGIN" != *"[bot]"* && "$USER_LOGIN" != "" ]]; then
+    echo "╔════════════════════════════════════════════════════════════════╗"
+    echo "║  FATAL: AUTHENTICATED AS PERSONAL ACCOUNT                     ║"
+    echo "║  Identity: $USER_LOGIN                                        ║"
+    echo "║  ABORTING — refusing to post as personal account              ║"
+    echo "╚════════════════════════════════════════════════════════════════╝"
+    exit 1
+  fi
+  echo "✓ Bot authentication verified (installation token, rate_limit OK)"
+else
   echo "╔════════════════════════════════════════════════════════════════╗"
-  echo "║  FATAL: NOT AUTHENTICATED AS BOT                              ║"
-  echo "║  Identity: $IDENTITY                                          ║"
-  echo "║  ABORTING — refusing to post as personal account              ║"
+  echo "║  FATAL: TOKEN INVALID OR EXPIRED                              ║"
+  echo "║  Rate limit check returned: $RATE_STATUS                      ║"
+  echo "║  ABORTING — token may be expired                              ║"
   echo "╚════════════════════════════════════════════════════════════════╝"
-  # DO NOT CONTINUE — report this error and stop the task
   exit 1
 fi
-echo "✓ Bot authentication verified: $IDENTITY"
 \`\`\`
 
 ## HARD RULES — VIOLATION = TASK FAILURE
@@ -49,7 +59,7 @@ echo "✓ Bot authentication verified: $IDENTITY"
 2. **If identity check fails → STOP IMMEDIATELY** — do not attempt workarounds
 3. **NEVER use \`gh\` without GH_TOKEN** — the default gh auth is the user's personal account
 4. **ALL GitHub API calls MUST include** \`-H "Authorization: Bearer $GH_TOKEN"\`
-5. **If you see "Not authenticated as bot"** → Report the error and END the task. Do NOT proceed.
+5. **If you see "TOKEN INVALID" or "PERSONAL ACCOUNT"** → Report the error and END the task. Do NOT proceed.
 `;
 }
 
