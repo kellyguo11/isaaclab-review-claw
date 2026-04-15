@@ -3,28 +3,25 @@
 # Returns: "TELEGRAM_OK" or "TELEGRAM_UNHEALTHY: <reason>"
 #
 # Checks:
-#   1. openclaw-gateway is running (supervisord)
+#   1. openclaw-gateway process is running
 #   2. Telegram Bot API responds to getMe
-#   3. No recent persistent errors in gateway logs (sustained failures)
+#   3. OpenClaw status reports telegram channel as OK
 
 set -euo pipefail
 
 BOT_TOKEN="8766038395:AAFDELTHmdm9qmpb_0KaUZSk6zyW2QTEBzE"
-GATEWAY_LOG_ERR="/var/log/supervisor/openclaw-gateway-err.log"
-GATEWAY_LOG_OUT="/var/log/supervisor/openclaw-gateway-out.log"
+OPENCLAW_BIN="$(which openclaw 2>/dev/null || echo /home/horde/.nvm/versions/node/v22.22.2/bin/openclaw)"
 
 # 1. Check gateway process is running
-GW_STATUS=$(sudo supervisorctl status openclaw-gateway 2>/dev/null | awk '{print $2}')
-if [[ "$GW_STATUS" != "RUNNING" ]]; then
-    echo "TELEGRAM_UNHEALTHY: openclaw-gateway is $GW_STATUS"
-    # Attempt restart
-    sudo supervisorctl restart openclaw-gateway 2>/dev/null
+if ! pgrep -f "openclaw-gateway" >/dev/null 2>&1; then
+    echo "TELEGRAM_UNHEALTHY: openclaw-gateway process not running"
+    # Attempt restart via openclaw CLI
+    $OPENCLAW_BIN gateway restart 2>/dev/null || true
     sleep 5
-    GW_STATUS2=$(sudo supervisorctl status openclaw-gateway 2>/dev/null | awk '{print $2}')
-    if [[ "$GW_STATUS2" != "RUNNING" ]]; then
-        echo "RESTART_FAILED: gateway still $GW_STATUS2 after restart attempt"
-    else
+    if pgrep -f "openclaw-gateway" >/dev/null 2>&1; then
         echo "RESTARTED: gateway recovered"
+    else
+        echo "RESTART_FAILED: gateway still not running after restart attempt"
     fi
     exit 1
 fi
@@ -38,33 +35,18 @@ if [[ "$API_OK" != "True" ]]; then
     exit 1
 fi
 
-# 3. Check for recent sustained Telegram errors in last 10 minutes
-# Count telegram error lines in the last 10 min of the err log
-RECENT_ERRORS=0
-if [[ -f "$GATEWAY_LOG_ERR" ]]; then
-    CUTOFF=$(date -d '10 minutes ago' '+%Y-%m-%dT%H:%M' 2>/dev/null || date -v-10M '+%Y-%m-%dT%H:%M' 2>/dev/null || echo "")
-    if [[ -n "$CUTOFF" ]]; then
-        RECENT_ERRORS=$(tail -100 "$GATEWAY_LOG_ERR" 2>/dev/null | grep -i telegram | grep -c "error\|fatal\|crash\|ECONNREFUSED\|ETIMEDOUT" 2>/dev/null || echo 0)
-    fi
-fi
-
-# 4. Verify telegram provider started (check stdout log)
-TG_STARTED=$(tail -50 "$GATEWAY_LOG_OUT" 2>/dev/null | grep -c "\[telegram\].*starting provider" || echo 0)
-if [[ "$TG_STARTED" -eq 0 ]]; then
-    # Check if it's been a while since gateway started — maybe logs rotated
-    GW_UPTIME=$(sudo supervisorctl status openclaw-gateway 2>/dev/null | grep -oP 'uptime \K.*')
-    echo "TELEGRAM_WARN: No recent 'starting provider' in logs (gateway uptime: $GW_UPTIME) — may be fine if running for a while"
-fi
-
-if [[ "$RECENT_ERRORS" -gt 5 ]]; then
-    echo "TELEGRAM_UNHEALTHY: $RECENT_ERRORS telegram errors in last 10 min — restarting gateway"
-    sudo supervisorctl restart openclaw-gateway 2>/dev/null
+# 3. Check OpenClaw reports telegram as OK
+TG_STATUS=$($OPENCLAW_BIN status 2>/dev/null | grep -i telegram | head -1 || echo "")
+if echo "$TG_STATUS" | grep -qi "error\|fail\|down"; then
+    echo "TELEGRAM_UNHEALTHY: openclaw status reports telegram issue: $TG_STATUS"
+    # Attempt gateway restart
+    $OPENCLAW_BIN gateway restart 2>/dev/null || true
     sleep 5
-    GW_STATUS3=$(sudo supervisorctl status openclaw-gateway 2>/dev/null | awk '{print $2}')
-    if [[ "$GW_STATUS3" == "RUNNING" ]]; then
-        echo "RESTARTED: gateway restarted due to high error rate"
+    TG_STATUS2=$($OPENCLAW_BIN status 2>/dev/null | grep -i telegram | head -1 || echo "")
+    if echo "$TG_STATUS2" | grep -qi "error\|fail\|down"; then
+        echo "RESTART_FAILED: telegram still unhealthy after restart"
     else
-        echo "RESTART_FAILED: gateway is $GW_STATUS3"
+        echo "RESTARTED: gateway restarted, telegram recovering"
     fi
     exit 1
 fi
