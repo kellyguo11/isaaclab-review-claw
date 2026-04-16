@@ -131,11 +131,12 @@
       "note": "PR #593 returns 404 - may have been closed/deleted or never existed in isaac-sim/IsaacLab"
     },
     "594": {
-      "last_reviewed_sha": "bf61210214ae9519a04c56529afc48a7ae9197b4",
-      "reviewed_at": "2026-04-14T20:12:46.821Z",
+      "last_reviewed_sha": "530f596e24e686b0079d0b3e140a4c59e295ded4",
+      "reviewed_at": "2026-04-15T21:57:34.442Z",
       "status": "followup-no-new-issues",
       "review_type": "followup-no-new-issues",
-      "repo": "isaac-sim/IsaacLab-Arena"
+      "repo": "isaac-sim/IsaacLab-Arena",
+      "note": "Follow-up f3: 13 diverged commits. Major refactor: removed NoCollision relation (now built-in solver behavior via clearance_m), added PlacementPool for pre-solved layouts, added resolve_on_reset support with EventTermCfg. 3/5 previous review issues addressed (None+empty guard, event tests added, env_id_tensor hoisted). 2/5 unaddressed (RandomAroundSolution dropped at reset, failed placements written to sim) but original comments remain visible. No new issues found. No review posted."
     },
     "595": {
       "last_reviewed_sha": "ffc57b9e62c11e94a227252b3c0e457d16a358e1",
@@ -184,18 +185,41 @@
       "review_type": "single-model-comprehensive"
     },
     "602": {
-      "last_reviewed_sha": "b01adfce1d35be0147cbf3b50a7e27dabc7e01e0",
-      "reviewed_at": "2026-04-14T23:40:35.006Z",
+      "last_reviewed_sha": "0055c83226ed7ef1a64dc360ccbaf57857627ec1",
+      "reviewed_at": "2026-04-15T22:45:12.056Z",
       "status": "followup-no-new-issues",
       "review_type": "followup-no-new-issues",
       "repo": "isaac-sim/IsaacLab-Arena",
-      "note": "Follow-up f2: 2 new commits are doc-only changes (added --viz kit flag, updated task description in RST files). No code changes to metrics sanitization. Previous concerns (np.integer→int, np.bool_ handling) still unaddressed but original comments remain visible. No new issues. No review posted."
+      "note": "Follow-up f3: Both previous concerns addressed — np.integer now converts to int (not float), np.bool_ handling added. Function renamed from sanitize_metrics to metrics_to_plain_python_types. 27 other files are unrelated changes (TYPE_CHECKING imports, doc fixes, test refactoring). No new issues. No review posted."
     },
     "603": {
       "last_reviewed_sha": "7242f40c04aae68ca29dd20dbb0ed6dd78d56497",
       "reviewed_at": "2026-04-14T19:52:27.275Z",
       "status": "reviewed",
       "review_type": "ensemble-multi-model"
+    },
+    "604": {
+      "last_reviewed_sha": "1e57c6c45db06caaff2e6a9cee923df7433ac747",
+      "reviewed_at": "2026-04-15T21:38:37.034Z",
+      "status": "reviewed",
+      "review_type": "ensemble-multi-model"
+    },
+    "607": {
+      "last_reviewed_sha": "fa9ed2b50ce1ed8009cf650231a589f73886ae5c",
+      "reviewed_at": "2026-04-15T23:49:17.942Z",
+      "status": "pr-not-found",
+      "note": "PR #607 does not exist as a pull request in isaac-sim/IsaacLab. Issue #607 is a closed question."
+    },
+    "608": {
+      "last_reviewed_sha": "eef98a4648d11d5b9679f589c9953591c5538613",
+      "reviewed_at": "2026-04-16T02:45:08.049Z",
+      "status": "reviewed"
+    },
+    "609": {
+      "last_reviewed_sha": "67e78e5e27b47116ba417a6a722aec020a19b066",
+      "reviewed_at": "2026-04-16T03:29:57.835Z",
+      "status": "skipped-not-found",
+      "note": "PR #609 does not exist as a pull request in isaac-sim/IsaacLab. Issue #609 is a closed bug report. Author qianl-nv has no matching PR. Follow-up aborted."
     },
     "3895": {
       "last_reviewed_sha": "07a0cab02f1efd4ae82fdf778bbc17cb651ad406",
@@ -618,10 +642,9 @@
       "status": "reviewed"
     },
     "5187": {
-      "last_reviewed_sha": "92d1e71555b934cdc62cf4ba79c08b03b530bb75",
-      "reviewed_at": "2026-04-15T20:57:13.478Z",
-      "status": "token_expired",
-      "error": "GH_TOKEN returned 401 - invalid or expired"
+      "last_reviewed_sha": "1f391a8989ccccb1d005843efb78ae34d376db8f",
+      "reviewed_at": "2026-04-15T23:34:27.273Z",
+      "status": "reviewed"
     },
     "5188": {
       "last_reviewed_sha": "57545c81cb950600d93564c59d3d1c6ce4e9c660",
@@ -708,8 +731,8 @@
       "review_type": "followup-no-new-issues"
     },
     "5222": {
-      "last_reviewed_sha": "1704d3f871c4cee141edf1dddd094791925f6a35",
-      "reviewed_at": "2026-04-12T22:46:10.351Z",
+      "last_reviewed_sha": "5a858bed66ac8cc4c827d5e7a89fb319ca39837d",
+      "reviewed_at": "2026-04-16T08:05:03.364Z",
       "status": "reviewed"
     },
     "5223": {
@@ -840,10 +863,9 @@
       "status": "reviewed"
     },
     "5268": {
-      "last_reviewed_sha": "687e2a57fd4e97647794b8397ddf355c03ca97ce",
-      "reviewed_at": "2026-04-14T14:31:05.538Z",
-      "status": "reviewed",
-      "review_type": "ensemble-multi-model"
+      "last_reviewed_sha": "590c48f6124ba45fc58c54a246e1c228ad17565d",
+      "reviewed_at": "2026-04-15T21:40:27.085Z",
+      "status": "reviewed"
     },
     "5269": {
       "last_reviewed_sha": "021e242810a77133bcba10b97fb37b3e34a7f779",
@@ -886,9 +908,42 @@
       "status": "reviewed"
     },
     "5279": {
-      "last_reviewed_sha": "a3d94f8eb9d2d3d395c6f5bf2cc5f6f2eb3eae08",
-      "reviewed_at": "2026-04-15T04:35:36.926Z",
+      "last_reviewed_sha": "7329d6ea94afd0623d8014e4f26dc9f87a69227c",
+      "reviewed_at": "2026-04-16T06:11:05.798Z",
       "status": "reviewed"
+    },
+    "5283": {
+      "last_reviewed_sha": "234ef68e884832edfbcc18afc372e956b500a292",
+      "reviewed_at": "2026-04-15T21:13:41.123Z",
+      "status": "reviewed",
+      "review_type": "ensemble-multi-model"
+    },
+    "5284": {
+      "last_reviewed_sha": "1c43697154f8a448639330edb534009ab35bd2aa",
+      "reviewed_at": "2026-04-16T06:42:39.917Z",
+      "status": "reviewed"
+    },
+    "5286": {
+      "last_reviewed_sha": "2d4f849dd1c5257cd97a0e9b97f598cf092977fd",
+      "reviewed_at": "2026-04-15T23:26:11.422Z",
+      "status": "reviewed",
+      "review_type": "ensemble-multi-model"
+    },
+    "5287": {
+      "last_reviewed_sha": "303e9ff2140449691a8bb042404a0cfbbdc16d33",
+      "reviewed_at": "2026-04-16T00:04:50.263Z",
+      "status": "reviewed"
+    },
+    "5289": {
+      "last_reviewed_sha": "f7608e5effb6e4c100820141e7dfd369a0c3667b",
+      "reviewed_at": "2026-04-16T07:31:06.802Z",
+      "status": "reviewed"
+    },
+    "5290": {
+      "last_reviewed_sha": "2a9a0264d1270d389676fff7d4f4e5d1639ef359",
+      "reviewed_at": "2026-04-16T08:17:25.319Z",
+      "status": "reviewed",
+      "review_type": "ensemble-multi-model"
     },
     "arena-562": {
       "last_reviewed_sha": "5e8fa7cb7856e3c48f82f71dfc5565bf57acace4",
@@ -925,6 +980,11 @@
     "544": {
       "sha": "6901d41be6f94bcf238907da1790eb3d933e8805",
       "triggered_at": "2026-04-09T11:25:50.829Z",
+      "action": "synchronize"
+    },
+    "546": {
+      "sha": "2a4946e9ca04e938af6d0e12c31567219d34ea5d",
+      "triggered_at": "2026-04-16T18:00:35.999Z",
       "action": "synchronize"
     },
     "551": {
@@ -1052,29 +1112,29 @@
       "triggered_at": "2026-04-13T13:48:29.426Z",
       "action": "synchronize"
     },
-    "594": {
-      "sha": "5d65d1bd1cb0c47bbfda066a36083e6e8add9819",
-      "triggered_at": "2026-04-15T20:25:43.106Z",
-      "action": "synchronize"
-    },
     "596": {
       "sha": "8c98d45a2aeb6f2f592665109f9e9a17b9d65d0e",
       "triggered_at": "2026-04-15T16:47:07.000Z",
       "action": "synchronize"
     },
+    "597": {
+      "sha": "c567b70b3819e9ca2abe7354937c459c924fc079",
+      "triggered_at": "2026-04-16T16:32:51.293Z",
+      "action": "synchronize"
+    },
     "598": {
-      "sha": "2d8f6d6f421ab2d16dde8209340240ebf5583493",
-      "triggered_at": "2026-04-15T09:11:57.199Z",
+      "sha": "1d5f04a5fe78194f58d2dd26930c03f8fc2dfc40",
+      "triggered_at": "2026-04-16T09:47:56.236Z",
       "action": "synchronize"
     },
     "602": {
-      "sha": "213915533fa21c713e432f86ac6b121f6c41f648",
-      "triggered_at": "2026-04-15T18:17:13.863Z",
+      "sha": "458c7c8f6019297d00c3244ab9334df60e6f15a5",
+      "triggered_at": "2026-04-16T16:09:18.872Z",
       "action": "synchronize"
     },
-    "604": {
-      "sha": "353a9c9909dfc45644f1192936c0cb9e872a9435",
-      "triggered_at": "2026-04-15T09:11:28.577Z",
+    "603": {
+      "sha": "9d7b2a2140b0c61087d123f10a738f8020998643",
+      "triggered_at": "2026-04-16T17:48:15.642Z",
       "action": "synchronize"
     },
     "605": {
@@ -1087,20 +1147,10 @@
       "triggered_at": "2026-04-15T12:05:04.064Z",
       "action": "opened"
     },
-    "607": {
-      "sha": "cbd2b797b06005e1f9373df29c9b6188d4e28edc",
-      "triggered_at": "2026-04-15T17:16:02.028Z",
-      "action": "synchronize"
-    },
-    "608": {
-      "sha": "9697fcb4a9cc6fb8570108152bc719b0471cf62e",
-      "triggered_at": "2026-04-15T17:35:22.639Z",
-      "action": "synchronize"
-    },
     "609": {
-      "sha": "b40fe04d3c67861cebf8e6f22ed64613f700a9a1",
-      "triggered_at": "2026-04-15T17:51:09.705Z",
-      "action": "opened"
+      "sha": "ac7a987f38661fee2721b28bcc0600df34cdc83b",
+      "triggered_at": "2026-04-16T14:48:29.354Z",
+      "action": "synchronize"
     },
     "610": {
       "sha": "598d41f182d6edf474bacaa233fbf158e82c8da6",
@@ -1110,6 +1160,11 @@
     "3895": {
       "sha": "e91af1ee8c06cd35b2d15e16d9ae88b9d7dd8197",
       "triggered_at": "2026-04-10T11:28:46.678Z",
+      "action": "synchronize"
+    },
+    "4829": {
+      "sha": "8fc71f83e7a7b7e3aba8b2031e01c7b7c5198f80",
+      "triggered_at": "2026-04-16T14:23:22.689Z",
       "action": "synchronize"
     },
     "4830": {
@@ -1122,6 +1177,16 @@
       "triggered_at": "2026-03-25T00:39:44.439Z",
       "action": "synchronize"
     },
+    "4852": {
+      "sha": "bcc24bc10b852a6738e3251152c835d6ac34898b",
+      "triggered_at": "2026-04-16T17:56:19.542Z",
+      "action": "synchronize"
+    },
+    "4945": {
+      "sha": "596b1995f9f35b5c3a201971fa60d07cd9e060cf",
+      "triggered_at": "2026-04-16T14:56:48.983Z",
+      "action": "synchronize"
+    },
     "4946": {
       "sha": "495e2c2a3ea40e6e5d88a8c53009e6a22f3dab40",
       "triggered_at": "2026-04-08T07:05:12.868Z",
@@ -1132,9 +1197,24 @@
       "triggered_at": "2026-03-31T00:12:31.110Z",
       "action": "synchronize"
     },
+    "5049": {
+      "sha": "e201acd7b6c2bdf1da5cd7412b53291bb377ddd1",
+      "triggered_at": "2026-04-16T11:10:42.439Z",
+      "action": "synchronize"
+    },
+    "5060": {
+      "sha": "66bec0250d3abad5ad1d3227aeefb005c7604c43",
+      "triggered_at": "2026-04-16T17:38:17.007Z",
+      "action": "synchronize"
+    },
     "5072": {
       "sha": "15f1647bfd9bb71fe99b16cf01ec727625705be0",
       "triggered_at": "2026-04-08T08:09:16.259Z",
+      "action": "synchronize"
+    },
+    "5103": {
+      "sha": "fa49a5ffb1772b849f1b8fa8d64421a583cb6e2a",
+      "triggered_at": "2026-04-16T18:14:51.587Z",
       "action": "synchronize"
     },
     "5104": {
@@ -1192,6 +1272,11 @@
       "triggered_at": "2026-04-10T16:06:09.390Z",
       "action": "synchronize"
     },
+    "5179": {
+      "sha": "38311336469ffd0a70e8a850c17f91d2076aa1f1",
+      "triggered_at": "2026-04-16T19:15:40.284Z",
+      "action": "synchronize"
+    },
     "5181": {
       "sha": "f1fe30f9b216db1ae899205425295173371235e5",
       "triggered_at": "2026-04-08T11:35:33.908Z",
@@ -1211,6 +1296,11 @@
       "sha": "c2b1b740305367425712441d5bc795827741faa9",
       "triggered_at": "2026-04-06T21:24:34.714Z",
       "action": "opened"
+    },
+    "5187": {
+      "sha": "b5bd44b7339f3e0eddc9865a306b9a8e9cdb9f94",
+      "triggered_at": "2026-04-16T14:34:26.238Z",
+      "action": "synchronize"
     },
     "5189": {
       "sha": "fa75125a2c8bdbaf629dce7b06a1c0fc296c82d0",
@@ -1282,9 +1372,14 @@
       "triggered_at": "2026-04-10T17:46:22.694Z",
       "action": "synchronize"
     },
+    "5222": {
+      "sha": "5fa5ab451b0e119ef238c0414f22b6077771d75c",
+      "triggered_at": "2026-04-16T17:06:28.205Z",
+      "action": "synchronize"
+    },
     "5224": {
-      "sha": "fe1dfc9d0616cfe0b555f2fab12250b6b9a7e014",
-      "triggered_at": "2026-04-15T14:46:12.796Z",
+      "sha": "1a6d31d864ff87041d6c023c9336ea4670ab8429",
+      "triggered_at": "2026-04-16T14:15:53.035Z",
       "action": "synchronize"
     },
     "5225": {
@@ -1302,19 +1397,29 @@
       "triggered_at": "2026-04-15T19:12:01.860Z",
       "action": "synchronize"
     },
+    "5238": {
+      "sha": "510b27d272db32109de6666b3fdd48abbc265a10",
+      "triggered_at": "2026-04-16T12:37:02.402Z",
+      "action": "synchronize"
+    },
     "5254": {
-      "sha": "0e8766c0ab1fc719d92482b58e6ae1432f067eb8",
-      "triggered_at": "2026-04-15T19:14:33.996Z",
+      "sha": "1d82d568084ea3507fa57cecb1f2560e4867fd59",
+      "triggered_at": "2026-04-16T14:45:26.385Z",
       "action": "synchronize"
     },
     "5259": {
-      "sha": "d6016b1ed4a85b928c18f50b66665978481b277f",
-      "triggered_at": "2026-04-14T22:16:35.092Z",
+      "sha": "26bcec72e9c63256051ad658329cc21c839bda86",
+      "triggered_at": "2026-04-16T15:32:11.380Z",
+      "action": "synchronize"
+    },
+    "5263": {
+      "sha": "db28f5cad1d32bd07cf21a817cb4de2a4392e79a",
+      "triggered_at": "2026-04-16T15:18:03.516Z",
       "action": "synchronize"
     },
     "5264": {
-      "sha": "b34cd3b4ed8e4157c7471bd9e4eb6a51d1f3d34b",
-      "triggered_at": "2026-04-15T12:54:27.252Z",
+      "sha": "811abe8f34d759cd2cef2ca00c5120c7c81b1bda",
+      "triggered_at": "2026-04-16T14:07:10.527Z",
       "action": "synchronize"
     },
     "5265": {
@@ -1322,9 +1427,9 @@
       "triggered_at": "2026-04-15T13:25:36.715Z",
       "action": "synchronize"
     },
-    "5268": {
-      "sha": "2821fd2c1ba000daa1a5d1e62d5f10e790ae5227",
-      "triggered_at": "2026-04-15T20:59:09.094Z",
+    "5267": {
+      "sha": "6d050da2424897a330f7feb3adb56d5fa749ce9e",
+      "triggered_at": "2026-04-16T14:33:49.463Z",
       "action": "synchronize"
     },
     "5272": {
@@ -1340,11 +1445,6 @@
     "5276": {
       "sha": "9ecd5e46fbdca5f38b1ec8492ae09c71d0b72ae0",
       "triggered_at": "2026-04-15T18:34:10.126Z",
-      "action": "synchronize"
-    },
-    "5279": {
-      "sha": "3162bfc3cdef8a1d5cd3496293a75819d4b1f6e5",
-      "triggered_at": "2026-04-15T14:49:15.261Z",
       "action": "synchronize"
     },
     "5280": {
@@ -1363,8 +1463,53 @@
       "action": "opened"
     },
     "5283": {
-      "sha": "75b0eedc9dcb5628194018ee9152a20611efca1f",
-      "triggered_at": "2026-04-15T20:53:11.549Z",
+      "sha": "5ec1a33337831079fa1db4ffc8084998c4b67bd8",
+      "triggered_at": "2026-04-16T17:21:22.965Z",
+      "action": "synchronize"
+    },
+    "5284": {
+      "sha": "74a34f7e7fb705caf070e657ac644968c7efa0e3",
+      "triggered_at": "2026-04-16T17:52:56.107Z",
+      "action": "synchronize"
+    },
+    "5289": {
+      "sha": "d326ba72d686ed64b500d6c0a1beb3c392a26dd3",
+      "triggered_at": "2026-04-16T16:53:53.021Z",
+      "action": "synchronize"
+    },
+    "5290": {
+      "sha": "25dc32c9a2c49d9874dd53a570bcb48ca5214ec6",
+      "triggered_at": "2026-04-16T11:03:58.842Z",
+      "action": "synchronize"
+    },
+    "5291": {
+      "sha": "61316036d01d390a6beafef79fe8f529fb43993c",
+      "triggered_at": "2026-04-16T16:45:41.089Z",
+      "action": "synchronize"
+    },
+    "5292": {
+      "sha": "e85712fc86617c51375878af3c826c9f94f01d2b",
+      "triggered_at": "2026-04-16T16:46:12.425Z",
+      "action": "synchronize"
+    },
+    "5293": {
+      "sha": "0d3a5391003268a8fcec966ba97bab486ed231f4",
+      "triggered_at": "2026-04-16T17:50:00.255Z",
+      "action": "reopened"
+    },
+    "5294": {
+      "sha": "062c87fa48ae2ba555cc2e74f8a02859582f307d",
+      "triggered_at": "2026-04-16T16:37:02.223Z",
+      "action": "opened"
+    },
+    "5295": {
+      "sha": "78f250ac26a363f344f97a0d2a0ce91df3439b5c",
+      "triggered_at": "2026-04-16T17:46:42.585Z",
+      "action": "synchronize"
+    },
+    "5296": {
+      "sha": "6ded9ea0da87370c605eab0ed6e580bd7a78f0bb",
+      "triggered_at": "2026-04-16T18:45:03.944Z",
       "action": "synchronize"
     }
   }
