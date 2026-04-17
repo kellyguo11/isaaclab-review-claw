@@ -176,6 +176,9 @@ Or manually: `bash webhook/start.sh`
 - Does it follow Isaac Lab's ownership model?
 - Cross-module impact analysis
 - Alternative approaches considered
+- **File placement:** Do new files belong in the right module/directory? Does the location match responsibility?
+- **API design:** Are new APIs in the correct files? Is the interface well-thought-out, or is it leaking implementation details?
+- **Separation of concerns:** Is logic split correctly between files, or are responsibilities mixed?
 
 ### Implementation
 - Tensor shape/device/dtype correctness
