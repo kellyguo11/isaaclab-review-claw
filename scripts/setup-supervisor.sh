@@ -34,7 +34,7 @@ mkdir -p /var/log
 # Install OpenClaw Gateway service
 cat > /etc/supervisor/conf.d/openclaw-gateway.conf << EOF
 [program:openclaw-gateway]
-command=$NODE_BIN/openclaw gateway start --foreground
+command=$NODE_BIN/openclaw gateway run
 directory=$HOME_DIR
 user=$USER
 autostart=true
