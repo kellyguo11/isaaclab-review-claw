@@ -62,7 +62,7 @@
       "repo": "isaac-sim/IsaacLab-Arena",
       "follow_up_auth_failed": true,
       "follow_up_attempted_at": "2026-04-13T13:55:40.835Z",
-      "follow_up_error": "Bot token authentication failed — identity returned UNKNOWN"
+      "follow_up_error": "Bot token authentication failed \u2014 identity returned UNKNOWN"
     },
     "581": {
       "last_reviewed_sha": "af42eab2abfe86f8cc3e0ba046a3d9503a6db63d",
@@ -190,7 +190,7 @@
       "status": "followup-no-new-issues",
       "review_type": "followup-no-new-issues",
       "repo": "isaac-sim/IsaacLab-Arena",
-      "note": "Follow-up f3: Both previous concerns addressed — np.integer now converts to int (not float), np.bool_ handling added. Function renamed from sanitize_metrics to metrics_to_plain_python_types. 27 other files are unrelated changes (TYPE_CHECKING imports, doc fixes, test refactoring). No new issues. No review posted."
+      "note": "Follow-up f3: Both previous concerns addressed \u2014 np.integer now converts to int (not float), np.bool_ handling added. Function renamed from sanitize_metrics to metrics_to_plain_python_types. 27 other files are unrelated changes (TYPE_CHECKING imports, doc fixes, test refactoring). No new issues. No review posted."
     },
     "603": {
       "last_reviewed_sha": "7242f40c04aae68ca29dd20dbb0ed6dd78d56497",
@@ -293,6 +293,15 @@
       "last_reviewed_sha": "a70c115880500976f67f4c6e218a12c0f5e30c0d",
       "reviewed_at": "2026-04-04T17:35:54.595Z",
       "status": "reviewed"
+    },
+    "4927": {
+      "last_reviewed_sha": "b4914bf1857abe0f446a335045e858ce26255d1e",
+      "reviewed_at": "2026-04-17T01:01:39.829Z",
+      "status": "reviewed",
+      "review_type": "docs-focused",
+      "review_id": 4125413609,
+      "repo": "isaac-sim/IsaacLab",
+      "note": "Claude Code skills PR (21 files, +2103 lines). Docs-only. Found missing mdp-catalog.md (broken links), CLAUDE.md include syntax change, $PYTHON inconsistency. Aligned with maintainer feedback on doc-referencing vs content duplication."
     },
     "4945": {
       "last_reviewed_sha": "1d2cd723356aae500805739b83e4b9967357ebdb",
@@ -945,10 +954,9 @@
       "review_type": "ensemble-multi-model"
     },
     "5293": {
-      "last_reviewed_sha": "3cfa3a74948e66e40a01ea0caf22ed6799230273",
-      "reviewed_at": "2026-04-16T20:45:49.200Z",
-      "status": "reviewed",
-      "review_type": "ensemble-multi-model"
+      "last_reviewed_sha": "9a9774a1b7222393a79cb82ddec6469160e16038",
+      "reviewed_at": "2026-04-17T01:12:52.744Z",
+      "status": "reviewed"
     },
     "5296": {
       "last_reviewed_sha": "a645b3e322e866eda52530692a252d037b7d67cf",
@@ -974,6 +982,13 @@
       "repo": "isaac-sim/IsaacLab-Arena",
       "review_type": "single-agent",
       "note": "PR closed, reopened as #567. Review posted as issue comment."
+    },
+    "5231": {
+      "last_reviewed_sha": "71394eff9ad01f76a7c650cd179d42dc2c93059f",
+      "reviewed_at": "2026-04-17T01:19:23.158194Z",
+      "status": "reviewed",
+      "review_type": "follow-up",
+      "review_id": 4125494472
     }
   },
   "last_poll": "2026-03-24T17:31:00Z",
@@ -1538,5 +1553,11 @@
       "triggered_at": "2026-04-16T23:29:17.520Z",
       "action": "opened"
     }
+  },
+  "5103": {
+    "last_reviewed_sha": "0ab9bca8a85d0bf3ed92b7a5254641dd69fc3627",
+    "review_id": 4125507737,
+    "reviewed_at": "2026-04-17T01:22:09Z",
+    "verdict": "Significant concerns"
   }
 }
