@@ -121,16 +121,22 @@ NOTE: The verdict is advisory text only. The bot NEVER posts APPROVE or REQUEST_
 - Related issues → group under one finding if they share a root cause
 - Contradictory findings → use your judgment to pick the correct one; do not present "two perspectives"
 
-### Severity Calibration
-- 🔴 **Critical:** Bugs, data corruption, security, silent failures that affect correctness
-- 🟡 **Warning:** Design concerns, missing error handling, important edge cases, test gaps
-- 🔵 **Suggestion:** Code quality, style (beyond linter), documentation, nice-to-haves
+### Severity Calibration (STRICT)
 
-### Verdict Logic
-- Any 🔴 Critical → **Significant concerns** or **Needs rework**
-- Multiple 🟡 Warnings without mitigation → **Minor fixes needed** or **Significant concerns**
-- Only 🟡/🔵 with clear fixes → **Minor fixes needed** (let author decide)
-- Clean review → **Ship it** (acknowledge good work)
+**Be harsh. These definitions are non-negotiable:**
+
+- 🔴 **Critical:** Bugs, data corruption, security issues, silent failures that affect correctness, **broad exception handlers that swallow real errors**, missing initialization that causes crashes, stale state that persists incorrectly
+- 🟡 **Warning:** Design concerns, missing error handling, important edge cases, test gaps, **breaking changes without documentation**, API inconsistencies
+- 🔵 **Suggestion:** Code quality, style (beyond linter), documentation, nice-to-haves, minor naming issues
+
+**Calibration check:** Before finalizing, ask: "Would a senior engineer at a top company accept this in a production robotics framework?" If the answer is "no" for any finding, it's at least a Warning. If it could cause silent data corruption or crashes in realistic scenarios, it's Critical.
+
+### Verdict Logic (STRICT)
+
+- **Any 🔴 Critical finding → "Significant concerns"** (no exceptions)
+- **3+ 🟡 Warnings → "Minor fixes needed" minimum** (possibly "Significant concerns" if they compound)
+- Only 🔵 Suggestions → "Ship it" or "Minor fixes needed"
+- Clean review with no findings → "Ship it"
 
 ### Quality Control
 - Don't include findings you can't verify from the diff/files
